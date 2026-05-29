@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ballpark</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Ballpark</h1>
+      <p class="tagline">Calibrate unfamiliar numbers as you read.</p>
+    </header>
+
+    <section class="section">
+      <label for="api-key">Anthropic API key</label>
+      <div class="input-row">
+        <input
+          type="password"
+          id="api-key"
+          placeholder="sk-ant-..."
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <button id="save-btn">Save</button>
+      </div>
+      <p class="hint" id="save-status"></p>
+      <p class="hint">
+        <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener noreferrer">Get an API key →</a>
+      </p>
+    </section>
+
+    <section class="section">
+      <p class="hint">
+        Ballpark underlines numbers on any page. Click an underlined number to
+        see a calibration card with context and comparisons.
+      </p>
+    </section>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>

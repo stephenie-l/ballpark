@@ -1,0 +1,158 @@
+/* Ballpark content styles — underlines and calibration card */
+
+/* ---- Number affordance ---- */
+
+.bp-number {
+  border-bottom: 1.5px dotted #6b8cba;
+  cursor: pointer;
+  color: inherit;
+  background: none;
+  transition: border-color 0.1s ease, color 0.1s ease;
+}
+
+.bp-number:hover,
+.bp-number--active {
+  border-bottom-color: #2c5f9e;
+  color: #2c5f9e;
+}
+
+/* ---- Card ---- */
+
+#bp-card {
+  position: absolute;
+  z-index: 2147483647;
+  width: 300px;
+  background: #ffffff;
+  border: 1px solid #d0d7de;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.06);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #1a1a1a;
+  padding: 14px 16px 12px;
+
+  /* Hidden by default */
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-4px);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  display: block;
+}
+
+#bp-card.bp-card--visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.bp-close {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #6e7781;
+  font-size: 13px;
+  padding: 2px 4px;
+  border-radius: 3px;
+  line-height: 1;
+}
+
+.bp-close:hover {
+  color: #1a1a1a;
+  background: #f0f0f0;
+}
+
+.bp-number-echo {
+  font-weight: 600;
+  font-size: 15px;
+  margin-bottom: 10px;
+  margin-right: 20px; /* clear the close button */
+  color: #1a1a1a;
+}
+
+/* ---- Loading ---- */
+
+.bp-loading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #6e7781;
+  padding: 4px 0 2px;
+}
+
+@keyframes bp-spin {
+  to { transform: rotate(360deg); }
+}
+
+.bp-spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid #d0d7de;
+  border-top-color: #6b8cba;
+  border-radius: 50%;
+  animation: bp-spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+/* ---- Result ---- */
+
+.bp-verdict {
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: #1a1a1a;
+}
+
+.bp-ref-class {
+  font-size: 11.5px;
+  color: #6e7781;
+  margin-bottom: 10px;
+}
+
+.bp-comparisons {
+  margin: 0 0 8px;
+  padding: 0 0 0 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bp-comparisons li {
+  color: #444;
+  font-size: 12px;
+}
+
+.bp-comparisons a {
+  color: #2c5f9e;
+  text-decoration: none;
+}
+
+.bp-comparisons a:hover {
+  text-decoration: underline;
+}
+
+.bp-confidence {
+  font-size: 11px;
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid #eaecef;
+}
+
+.bp-confidence--searched {
+  color: #1a7f37;
+}
+
+.bp-confidence--memory {
+  color: #6e7781;
+}
+
+/* ---- Error ---- */
+
+.bp-error {
+  color: #cf222e;
+  font-size: 12px;
+  padding: 4px 0;
+}

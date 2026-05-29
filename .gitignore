@@ -1,0 +1,17 @@
+# Mac
+.DS_Store
+
+# Dev docs (not part of the shipped extension)
+docs/
+
+# Editor metadata
+.vscode/
+.idea/
+
+# Node modules (if you ever add any)
+node_modules/
+
+# Local env files (defensive — shouldn't exist but just in case)
+.env
+.env.local
+*.key

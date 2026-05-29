@@ -1,0 +1,36 @@
+{
+  "manifest_version": 3,
+  "name": "Ballpark",
+  "version": "1.0.0",
+  "description": "Calibrate unfamiliar numbers while you read. Click any underlined figure for context and comparisons.",
+
+  "homepage_url": "https://github.com/stephenie-l/ballpark",
+
+  "permissions": ["storage"],
+  "host_permissions": ["https://api.anthropic.com/*"],
+
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["lib/detector.js", "lib/card.js", "content.js"],
+      "css": ["content.css"],
+      "run_at": "document_idle"
+    }
+  ],
+
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Ballpark"
+  },
+
+  "icons": {
+    "16": "icons/ballpark_logo_small.png",
+    "48": "icons/ballpark_logo_small.png",
+    "128": "icons/ballpark_logo.png"
+  }
+}
