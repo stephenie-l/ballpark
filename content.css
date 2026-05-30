@@ -83,6 +83,12 @@
   padding: 4px 0 2px;
 }
 
+/* `.bp-loading` sets display:flex, which overrides the UA [hidden] rule.
+   Re-assert hidden with matching specificity so .hidden = true works. */
+.bp-loading[hidden] {
+  display: none;
+}
+
 @keyframes bp-spin {
   to { transform: rotate(360deg); }
 }
