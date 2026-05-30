@@ -29,8 +29,8 @@
   },
 
   "icons": {
-    "16": "icons/ballpark_logo_small.png",
-    "48": "icons/ballpark_logo_small.png",
-    "128": "icons/ballpark_logo.png"
+    "16": "icons/ballpark_16.png",
+    "48": "icons/ballpark_48.png",
+    "128": "icons/ballpark_128.png"
   }
 }
