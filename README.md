@@ -16,8 +16,6 @@ Numbers on the page get a subtle dotted underline. Click one and a small card ap
 - **One or two grounded comparisons** to anchor your intuition
 - **A source indicator** — `✓ Searched` (green) if the answer was checked against a live web search, or `~ From memory` (gray) if it came from the model's prior knowledge
 
-That last indicator is deliberate, and it points at the whole philosophy of the tool ↓
-
 ## Who it's for
 
 Ballpark is for people who read to understand and form a view, in territory where their numerical intuition isn't calibrated yet:
@@ -99,13 +97,12 @@ Full details: [Privacy Policy](PRIVACY.md) <!-- update to the hosted URL once li
 
 - **Web pages only.** Ballpark reads text from the page's DOM, so it can't see PDFs opened in Chrome's built-in viewer, content in native desktop apps, or text that's rendered to a canvas rather than the DOM — notably Google Docs. A report opened as a PDF won't light up; the same report as a web article will.
 - **Web search inflates cost.** Search results count as input tokens, so searched calls are meaningfully pricier than memory-only ones.
-- **Memory-only answers can be confidently wrong on specifics.** This is why the `~ From memory` indicator exists and why the framing is calibration, not verification.
-- **Minor UI:** the loading spinner occasionally doesn't dismiss cleanly after the card loads, and it flashes briefly even on instant cache hits (imperceptible in practice).
+- **Memory-only answers are directional, not precise.** When the model hasn't searched, it's now instructed to stick to relative/scale comparisons (ratios, multiples, percentiles) rather than inventing specific named facts like prices or deal dates. This sharply reduces confidently-wrong specifics, but the `~ From memory` indicator still means "trust the direction, not the exact figure" — the framing remains calibration, not verification.
+- **Minor UI:** the loading spinner flashes briefly even on instant cache hits (imperceptible in practice).
 
 ## Roadmap
 
-- A toggle to force a web search on every call (trading cost for reliability)
-- A prompt refinement instructing the model to prefer directional comparisons over precise figures when it hasn't searched
+- **Next version:** a toggle to turn web search on or off — force grounding on every call when you want reliability, or keep it off entirely for speed and the lowest cost
 - A subtle "from cache" indicator on the card (the `cached` flag is already passed through from the background worker; it just needs surfacing)
 - Persisting the cache across sessions (currently session-scoped via `chrome.storage.session`)
 
