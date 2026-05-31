@@ -98,7 +98,6 @@ Full details: [Privacy Policy](PRIVACY.md) <!-- update to the hosted URL once li
 - **Web pages only.** Ballpark reads text from the page's DOM, so it can't see PDFs opened in Chrome's built-in viewer, content in native desktop apps, or text that's rendered to a canvas rather than the DOM — notably Google Docs. A report opened as a PDF won't light up; the same report as a web article will.
 - **Web search inflates cost.** Search results count as input tokens, so searched calls are meaningfully pricier than memory-only ones.
 - **Memory-only answers are directional, not precise.** When the model hasn't searched, it's now instructed to stick to relative/scale comparisons (ratios, multiples, percentiles) rather than inventing specific named facts like prices or deal dates. This sharply reduces confidently-wrong specifics, but the `~ From memory` indicator still means "trust the direction, not the exact figure" — the framing remains calibration, not verification.
-- **Minor UI:** the loading spinner flashes briefly even on instant cache hits (imperceptible in practice).
 
 ## Roadmap
 
