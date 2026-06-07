@@ -27,8 +27,6 @@ Ballpark is for people who read to understand and form a view, in territory wher
 
 It's deliberately *not* for everyday numbers you already have a feel for. It earns its place when the territory is unfamiliar.
 
-![Ballpark cards across domains — startup funding, semiconductors, and manufacturing gross margins](assets/screenshots/domains.png)
-
 ## Calibration, not verification
 
 Ballpark is built to give you a **rough directional sense**, not to fact-check. The distinction matters:
@@ -66,8 +64,6 @@ No data passes through any server but Anthropic's, and that call is made with *y
 ## Bring your own API key
 
 Ballpark is free and has no backend. You supply your own [Anthropic API key](https://console.anthropic.com/), and you pay only for what you use — the calls go directly from your browser to Anthropic.
-
-![Ballpark popup for pasting your Anthropic API key — free, and collects no data](assets/screenshots/byok.png)
 
 Why this model:
 
