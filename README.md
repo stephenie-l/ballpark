@@ -1,11 +1,12 @@
 # Ballpark
 
+![Ballpark — get a sense of scale on any number](assets/screenshots/banner.png)
+
 > A Chrome extension that helps you calibrate unfamiliar numbers as you read — built for people working at the edge of what they know.
 
 You're reading that a cybersecurity startup raised a $28M Series B, a biotech's Phase II trial enrolled 180 patients, or a hardware brand runs 34% gross margins. Is that big? Small? Normal for that field? If you don't live in the industry you have no reference frame — and your existing intuition often misleads you (a 34% margin is alarming for SaaS but healthy for physical goods). Ballpark gives you a quick directional sense, in place, without leaving the page.
 
-![Ballpark card on an article](docs/screenshots/hero.png)
-<!-- Replace with your real screenshot before publishing -->
+![Ballpark calibration card on a news article — "is $444 million a lot?"](assets/screenshots/demo.png)
 
 ## What it does
 
@@ -16,6 +17,8 @@ Numbers on the page get a subtle dotted underline. Click one and a small card ap
 - **One or two grounded comparisons** to anchor your intuition
 - **A source indicator** — `✓ Searched` (green) if the answer was checked against a live web search, or `~ From memory` (gray) if it came from the model's prior knowledge
 
+![Anatomy of a card: the number clicked, the verdict, the reference class, the comparisons, and the source indicator](assets/screenshots/anatomy.png)
+
 ## Who it's for
 
 Ballpark is for people who read to understand and form a view, in territory where their numerical intuition isn't calibrated yet:
@@ -25,6 +28,8 @@ Ballpark is for people who read to understand and form a view, in territory wher
 - **Analysts and investors** — market researchers, financial analysts, solo traders — digesting unfamiliar numbers all day and needing a fast first read before they dig in.
 
 It's deliberately *not* for everyday numbers you already have a feel for. It earns its place when the territory is unfamiliar.
+
+![Ballpark cards across domains — startup funding, semiconductors, and manufacturing gross margins](assets/screenshots/domains.png)
 
 ## Calibration, not verification
 
@@ -57,12 +62,14 @@ No data passes through any server but Anthropic's, and that call is made with *y
 
 1. Clone this repo
 2. Go to `chrome://extensions`, enable **Developer mode** (top right)
-3. Click **Load unpacked** and select the `ballpark/` directory
+3. Click **Load unpacked** and select the cloned repo's root folder
 4. Click the Ballpark icon in your toolbar and paste your Anthropic API key
 
 ## Bring your own API key
 
 Ballpark is free and has no backend. You supply your own [Anthropic API key](https://console.anthropic.com/), and you pay only for what you use — the calls go directly from your browser to Anthropic.
+
+![Ballpark popup for pasting your Anthropic API key — free, and collects no data](assets/screenshots/byok.png)
 
 Why this model:
 
@@ -93,6 +100,17 @@ Full details: [Privacy Policy](https://stephenieliew.com/ballpark/privacy)
 - The calibration prompt lives in `prompts/calibration.md` — that's the file to iterate on
 - Claude Haiku 4.5 with the server-side `web_search_20250305` tool (`max_uses: 1`)
 
+## Development
+
+The **shipped extension** has no build step and no runtime dependencies — it's vanilla JS loaded straight into Chrome. There is a small **dev-only** setup for tests; nothing from it is bundled into the extension.
+
+```bash
+npm install   # installs jsdom, the only dev dependency
+npm test      # runs the test suite via Node's built-in runner
+```
+
+`test/detector.test.js` covers the number detector (`lib/detector.js`) — black-box tests that load the real content script into a jsdom DOM and assert which numbers get underlined. The detector is a precision/recall balance, so run these after any change there.
+
 ## Known limitations
 
 - **Web pages only.** Ballpark reads text from the page's DOM, so it can't see PDFs opened in Chrome's built-in viewer, content in native desktop apps, or text that's rendered to a canvas rather than the DOM — notably Google Docs. A report opened as a PDF won't light up; the same report as a web article will.
@@ -107,4 +125,4 @@ Full details: [Privacy Policy](https://stephenieliew.com/ballpark/privacy)
 
 ## License
 
-MIT <!-- confirm or change before publishing -->
+[MIT](LICENSE) © 2026 Stephenie Liew
