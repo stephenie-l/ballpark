@@ -10,12 +10,22 @@ The extension is published on the Chrome Web Store; end users install it from th
 
 ## Developer workflow
 
-There is **no build step, no package manager, and no automated tests** — it's vanilla JS loaded directly into Chrome.
+The **shipped extension** has no build step and no runtime dependencies — it's vanilla JS loaded directly into Chrome. There is now a **dev-only** test setup (`package.json` + `jsdom`); nothing from it is loaded into the extension.
 
 - **Load for development:** `chrome://extensions` → enable Developer mode → Load unpacked → select the repo root.
 - **Iterate:** after editing, click the reload icon on the extension card. Content-script changes also need a page reload; background changes take effect on extension reload.
 - **API key:** click the toolbar icon and paste an Anthropic key. Stored in `chrome.storage.local`. Without it, every calibration errors.
 - **Debug:** content-script logs appear in the page's DevTools console; background/service-worker logs appear via the "service worker" link on the extension card.
+
+## Testing
+
+Run with `npm test` (Node's built-in runner — no Jest/Vitest, `jsdom` is the only dev dependency). Testing splits into two tiers with opposite economics; keep them separate.
+
+**Tier 1 — deterministic logic (DONE).** `test/detector.test.js` covers `lib/detector.js`. These are **black-box** tests: load the real content-script IIFE into a jsdom DOM via `window.eval`, run `underlineAll`, and assert which numbers came out underlined. They never touch the IIFE's internals, so refactors are safe as long as observable behavior holds. Conventions worth preserving:
+- A known bug is recorded as a **`todo` test asserting the *correct* behavior**, never as a passing test that bakes in the buggy output. Flip `todo` → real test when fixing (see the decimal-numbers fix in git history for the pattern).
+- The detector is fiddly (regex + exclusion heuristics) and degrades silently, so any change there should run against these cases. Good follow-on coverage if extending: `api.js`'s `parseResponse` is also pure and worth unit-testing the same way.
+
+**Tier 2 — LLM calibration eval (NOT YET BUILT — pick up here).** The plan: feed real `{url, number, context}` fixtures (a separate test-data file the user will provide) to the real `calibrate()` and check **acceptance criteria**, not exact strings — *structural* (valid JSON, verdict < 15 words, `reference_class` present, 1–2 comparisons, `searched` is boolean) and *directional* (verdict's large/small/typical matches expected; reference class mentions the expected domain). This is an **eval, not a unit test**: it costs real API tokens and is non-deterministic, so it runs manually when `prompts/calibration.md` or the model changes — not on every commit. Use loose assertions (keyword/regex or LLM-as-judge), not `assert.equal`.
 
 ## Two JS execution contexts (the key architectural split)
 
