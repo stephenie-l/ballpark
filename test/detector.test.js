@@ -111,17 +111,14 @@ test('attaches surrounding context to each underlined span', () => {
 // These assert what the detector does TODAY, not necessarily what we'd want.
 // They exist so the behavior is visible and a future change is a conscious one.
 
-test(
-  'BUG: decimal numbers should be underlined but are dropped as "versions"',
-  { todo: 'RE_VERSION (detector.js:51) matches the decimal prefix of any number — see /^v?\\d+\\.\\d+/. Drops 4.5%, 2.3M, 2.3 billion. Currency forms ($1.2T) survive only because they start with a symbol.' },
-  () => {
-    // These assert the DESIRED behavior. They currently fail, which is why
-    // they're marked todo — flip to a normal test() once the bug is fixed.
-    assert.deepEqual(underlinedInPara('up 4.5% this quarter'), ['4.5%']);
-    assert.deepEqual(underlinedInPara('2.3M users signed up'), ['2.3M']);
-    assert.deepEqual(underlinedInPara('some 2.3 billion people'), ['2.3 billion']);
-  }
-);
+test('underlines decimal numbers (percent, suffix, and magnitude-word forms)', () => {
+  // Regression guard: RE_VERSION used to match the leading "N.N" of any decimal
+  // and drop these as if they were version strings. Decimals are ubiquitous in
+  // Ballpark's domain (margins, percentages, "2.3 billion people").
+  assert.deepEqual(underlinedInPara('up 4.5% this quarter'), ['4.5%']);
+  assert.deepEqual(underlinedInPara('2.3M users signed up'), ['2.3M']);
+  assert.deepEqual(underlinedInPara('some 2.3 billion people'), ['2.3 billion']);
+});
 
 test('GAP: bare 3-digit counts are not underlined (no suffix/%/currency)', () => {
   // The README's "Phase II trial enrolled 180 patients" example would NOT
