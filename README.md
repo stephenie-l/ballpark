@@ -84,7 +84,7 @@ Ballpark collects **nothing**. There is no analytics, no telemetry, and no serve
 - **Sent to Anthropic:** that same context, using your API key, to generate the calibration. [Anthropic's privacy policy](https://www.anthropic.com/legal/privacy).
 - **Stored:** only your API key, kept locally in `chrome.storage.local` on your own machine. Removing the extension removes it.
 
-Full details: [Privacy Policy](PRIVACY.md) <!-- update to the hosted URL once live -->
+Full details: [Privacy Policy](https://github.com/stephenie-l/ballpark/blob/main/PRIVACY.md)
 
 ## Tech
 
