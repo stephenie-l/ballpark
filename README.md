@@ -1,7 +1,5 @@
 # Ballpark
 
-![Ballpark — get a sense of scale on any number](assets/screenshots/banner.png)
-
 > A Chrome extension that helps you calibrate unfamiliar numbers as you read — built for people working at the edge of what they know.
 
 You're reading that a cybersecurity startup raised a $28M Series B, a biotech's Phase II trial enrolled 180 patients, or a hardware brand runs 34% gross margins. Is that big? Small? Normal for that field? If you don't live in the industry you have no reference frame — and your existing intuition often misleads you (a 34% margin is alarming for SaaS but healthy for physical goods). Ballpark gives you a quick directional sense, in place, without leaving the page.
