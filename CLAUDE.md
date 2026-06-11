@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Ballpark is a Manifest V3 Chrome extension that helps readers calibrate unfamiliar numbers in place. It underlines numbers on a page; clicking one asks Claude (Haiku 4.5, with optional web search) whether the number is large/small/typical for its inferred reference class, then renders a small card next to it. The framing is **calibration, not verification** — the prompt and UI deliberately steer toward directional/relative answers, not fact-checking. See `README.md` for the product rationale.
 
-The extension is published on the Chrome Web Store; end users install it from there with their own Anthropic API key. The workflow below is for developing the source, not for using the shipped extension.
+The extension is published on the Chrome Web Store (first release was manifest `version` 1.0.0; a `version` 1.0.1 resubmission with live-bug fixes is being prepared as of 2026-06-10); end users install it from there with their own Anthropic API key. The workflow below is for developing the source, not for using the shipped extension.
 
 ## Developer workflow
 
@@ -17,6 +17,24 @@ The **shipped extension** has no build step and no runtime dependencies — it's
 - **API key:** click the toolbar icon and paste an Anthropic key. Stored in `chrome.storage.local`. Without it, every calibration errors.
 - **Debug:** content-script logs appear in the page's DevTools console; background/service-worker logs appear via the "service worker" link on the extension card.
 
+## Packaging for the Web Store
+
+There is no build, so the upload zip is assembled by hand. Use an **allowlist** (zip only the files the extension loads) — never zip the whole repo, which would pull in dev-only dirs. `docs/` is gitignored and `assets/`, `test/`, `node_modules/`, `package*.json`, the `*.md` files, and the unused `icons/ballpark_highres.png` are all dev-only and must stay out.
+
+```bash
+rm -f ballpark.zip
+zip -r ballpark.zip \
+  manifest.json background.js content.js content.css \
+  popup.html popup.css popup.js \
+  welcome.html welcome.css \
+  lib/api.js lib/card.js lib/detector.js \
+  prompts/calibration.md \
+  icons/ballpark_16.png icons/ballpark_48.png icons/ballpark_128.png
+unzip -l ballpark.zip   # verify: exactly these 16 files, no .DS_Store
+```
+
+Every resubmission needs a bumped `manifest.json` `version` or the Web Store rejects it. README screenshots live in tracked `assets/screenshots/` (so they render on GitHub) — these are separate from the store-listing screenshots, which are uploaded directly in the dashboard.
+
 ## Testing
 
 Run with `npm test` (Node's built-in runner — no Jest/Vitest, `jsdom` is the only dev dependency). Testing splits into two tiers with opposite economics; keep them separate.
@@ -25,7 +43,7 @@ Run with `npm test` (Node's built-in runner — no Jest/Vitest, `jsdom` is the o
 - A known bug is recorded as a **`todo` test asserting the *correct* behavior**, never as a passing test that bakes in the buggy output. Flip `todo` → real test when fixing (see the decimal-numbers fix in git history for the pattern).
 - The detector is fiddly (regex + exclusion heuristics) and degrades silently, so any change there should run against these cases. Good follow-on coverage if extending: `api.js`'s `parseResponse` is also pure and worth unit-testing the same way.
 
-**Tier 2 — LLM calibration eval (NOT YET BUILT — pick up here).** The plan: feed real `{url, number, context}` fixtures (a separate test-data file the user will provide) to the real `calibrate()` and check **acceptance criteria**, not exact strings — *structural* (valid JSON, verdict < 15 words, `reference_class` present, 1–2 comparisons, `searched` is boolean) and *directional* (verdict's large/small/typical matches expected; reference class mentions the expected domain). This is an **eval, not a unit test**: it costs real API tokens and is non-deterministic, so it runs manually when `prompts/calibration.md` or the model changes — not on every commit. Use loose assertions (keyword/regex or LLM-as-judge), not `assert.equal`.
+**Tier 2 — LLM calibration eval (BUILT).** Fixtures live at `test/fixtures/calibration-cases.json` (22 real cases + `_section` separators); the harness is `eval/calibration-eval.mjs`, run with `ANTHROPIC_API_KEY=sk-ant-... npm run eval`. It feeds each fixture's real `{url, number, context}` to the real `calibrate()` (real prompt + model + parser, so it also exercises the `insufficient_context` path) and checks **acceptance criteria**, not exact strings — *structural* (verdict < 15 words, `reference_class` present, 1–2 comparisons, `searched` is boolean) and *directional* (verdict's large/small/typical matches `expected_direction` via the fixture's `verdict_keywords`; `reference_class` mentions an expected-domain keyword). It **prints a report, never throws** — it's an eval, not a gate. It costs real API tokens and is non-deterministic, so it lives **outside `test/`** (so `npm test` never runs it) and is invoked manually when `prompts/calibration.md` or the model changes. To import the real ESM `api.js` from Node, `lib/package.json` marks `lib/` as `type: module` (dev-only; Chrome ignores it, and it's excluded from the packaging allowlist). Known open items from the last run: the model overshoots the 15-word verdict cap ~18% of the time (prompt-tuning candidate), and several fixtures encode opinionated absolute-vs-peer reference classes the model reasonably differs on (fixture-review candidates, not prompt bugs); no fixture yet exercises the truly-nonsensical `insufficient_context` case.
 
 ## Two JS execution contexts (the key architectural split)
 
@@ -41,6 +59,20 @@ Do not add `import` to a content script or `window.` globals to the background �
 A click on an underlined number sends a message from the content script to the background worker, which checks a cache, then calls the Anthropic API if needed, then returns the result for the card to render. Network calls only happen in the background; the content script handles UI.
 
 There is a session-scoped cache between the click handler and the API call — if a calibration appears to skip the API, look there first.
+
+## Planned: local reference layer (NOT YET BUILT — direction)
+
+Goal: add a **third tier between the cache and the API** so common, stable numbers can be calibrated from data we ship in the repo, with **no API call and no web search** — a much lower-cost path. The model/search tier stays the fallback for anything not covered.
+
+Intended flow once built: click → session cache → **local reference lookup** → API (with optional search). Each layer is cheaper than the next; only fall through on a miss.
+
+- **What it is:** a small reference file (e.g. `data/reference.json` or similar) keyed by common industries / number types (salaries, populations, prices, distances, file sizes, etc.) holding the reference class and typical ranges needed to produce a directional verdict locally. Keep it directional-not-specific, consistent with `prompts/calibration.md`.
+- **Lookup mechanism:** a matcher that maps a `{number, context}` to a reference-class entry (likely lives alongside `lib/api.js` in the background, since that's where calibration is decided). On a confident match, return a locally-built result; otherwise fall through to the API. Mark the result's provenance so the card can distinguish local vs. API/searched (mirror the existing `searched` indicator pattern).
+- **Two mechanisms this needs (open design questions):**
+  1. **Updating mechanism** — how reference data is refreshed so it doesn't go stale (manual curation vs. a periodic job that re-derives ranges; versioning the data file; who/what triggers updates).
+  2. **Fact-check mechanism** — how we trust an entry before serving it without a search (provenance/source per entry, a verification pass, and a confidence threshold below which we fall through to the API instead of answering locally).
+
+Both are unsolved — treat them as the core of the design, not an afterthought. Tier 2 eval fixtures (`test/fixtures/calibration-cases.json`) are a natural source of regression cases for validating local answers against the API tier.
 
 ## Two things to know about the response
 

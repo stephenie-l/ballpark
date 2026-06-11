@@ -1,10 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Ballpark",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Calibrate unfamiliar numbers while you read. Click any underlined figure for context and comparisons.",
-
-  "homepage_url": "https://github.com/stephenie-l/ballpark",
 
   "permissions": ["storage"],
   "host_permissions": ["https://api.anthropic.com/*"],

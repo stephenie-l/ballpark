@@ -8,9 +8,12 @@
 </head>
 <body>
   <div class="container">
-    <header>
-      <h1>Ballpark</h1>
-      <p class="tagline">Calibrate unfamiliar numbers as you read.</p>
+    <header class="header">
+      <img src="icons/ballpark_48.png" alt="" class="logo" width="28" height="28" />
+      <div>
+        <h1>Ballpark</h1>
+        <p class="tagline">Calibrate numbers as you read.</p>
+      </div>
     </header>
 
     <section class="section">
@@ -25,16 +28,20 @@
         />
         <button id="save-btn">Save</button>
       </div>
+      <p class="hint key-state" id="key-state"></p>
       <p class="hint" id="save-status"></p>
       <p class="hint">
         <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener noreferrer">Get an API key →</a>
       </p>
     </section>
 
-    <section class="section">
+    <section class="section section--footer">
       <p class="hint">
-        Ballpark underlines numbers on any page. Click an underlined number to
-        see a calibration card with context and comparisons.
+        Click any <span class="demo-underline">underlined number</span> on a page
+        to calibrate it.
+      </p>
+      <p class="hint">
+        <a href="welcome.html" target="_blank" rel="noopener noreferrer">Open full setup guide →</a>
       </p>
     </section>
   </div>

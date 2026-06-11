@@ -1,0 +1,4 @@
+{
+  "//": "Dev-only. Marks lib/*.js as ES modules so Node tooling (the calibration eval) can import api.js the same way the background service worker does. Chrome ignores this file; it is not part of the shipped extension (see the packaging allowlist in CLAUDE.md).",
+  "type": "module"
+}

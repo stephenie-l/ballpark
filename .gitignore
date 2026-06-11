@@ -1,6 +1,12 @@
 # Mac
 .DS_Store
 
+# Build artifact — assembled by hand for Web Store upload, not source
+ballpark.zip
+
+# Playwright MCP scratch (screenshots/logs from manual debugging)
+.playwright-mcp/
+
 # Dev docs (not part of the shipped extension)
 docs/
 

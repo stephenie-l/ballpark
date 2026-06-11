@@ -25,6 +25,15 @@ Return ONLY valid JSON — no markdown, no explanation, no wrapper text. Schema:
   ]
 }
 
+If — and only if — the number cannot be anchored to any real-world reference class (it is nonsensical, fabricated, or has no meaningful real-world referent, e.g. "a kindergarten with 20 million children"), do NOT force an answer. Instead return exactly:
+
+{
+  "insufficient_context": true,
+  "verdict": "string — one short, friendly sentence saying there isn't enough real-world context to calibrate this number"
+}
+
+Use this only as a genuine last resort. Thin-but-real context is not enough to bail — for ordinary numbers with sparse context, still produce a directional calibration and note the ambiguity in the verdict.
+
 Rules:
 - The verdict must name the reference class and give a relative position (top quartile, below average, typical, etc.)
 - Default to directional comparisons: ratios, multiples, percentiles, and scale language ("about half of", "2–3× larger than", "top quartile")

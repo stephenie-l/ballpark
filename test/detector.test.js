@@ -88,6 +88,15 @@ test('does NOT underline numbers inside links', () => {
   assert.deepEqual(underline('<p>see <a href="#">$28M round</a></p>'), []);
 });
 
+test('does NOT underline numbers inside our own card (#bp-card)', () => {
+  // The re-scan observer fires when the card mounts; without this skip it would
+  // underline the figures in the card's own verdict/comparisons.
+  assert.deepEqual(
+    underline('<div id="bp-card"><div>worth $40B vs $28M</div></div><p>raised $5M</p>'),
+    ['$5M']
+  );
+});
+
 test('does NOT underline numbers inside code/pre', () => {
   assert.deepEqual(underline('<p>set <code>$28M</code> here</p>'), []);
   assert.deepEqual(underline('<pre>budget = $40B</pre>'), []);
@@ -105,6 +114,33 @@ test('attaches surrounding context to each underlined span', () => {
   const span = dom.window.document.querySelector('.bp-number');
   assert.ok(span, 'expected a .bp-number span');
   assert.match(span.dataset.context, /Series B/);
+});
+
+test('re-running underlineAll is idempotent (no double-wrap)', () => {
+  // content.js re-scans on every settled DOM mutation (MutationObserver) to
+  // recover underlines that React hydration wipes on news sites. That only works
+  // if a second pass over already-underlined DOM is a no-op: same spans, none
+  // nested inside another .bp-number.
+  const dom = new JSDOM(
+    '<!DOCTYPE html><body><p>raised $28M at a $200M valuation</p></body>',
+    { runScripts: 'outside-only' }
+  );
+  dom.window.eval(DETECTOR_SRC);
+  const { document } = dom.window;
+
+  dom.window.BallparkDetector.underlineAll(document.body);
+  const afterFirst = [...document.querySelectorAll('.bp-number')].map((s) => s.textContent);
+
+  dom.window.BallparkDetector.underlineAll(document.body);
+  const afterSecond = [...document.querySelectorAll('.bp-number')].map((s) => s.textContent);
+
+  assert.deepEqual(afterSecond, afterFirst, 'span set changed on re-scan');
+  assert.deepEqual(afterSecond, ['$28M', '$200M']);
+  assert.equal(
+    document.querySelectorAll('.bp-number .bp-number').length,
+    0,
+    'found a .bp-number nested inside another — double-wrapped'
+  );
 });
 
 // --- Documented current-behavior gaps -------------------------------------
