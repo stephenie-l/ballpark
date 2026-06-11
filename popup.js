@@ -1,13 +1,16 @@
-// popup.js
+// popup.js — shared by popup.html and welcome.html (both expose #api-key,
+// #save-btn, #save-status; #key-state is optional and only present in the popup).
 
 const keyInput = document.getElementById('api-key');
 const saveBtn = document.getElementById('save-btn');
 const status = document.getElementById('save-status');
+const keyState = document.getElementById('key-state'); // may be null
 
 // Load existing key (show masked if present)
 chrome.storage.local.get('apiKey', ({ apiKey }) => {
   if (apiKey) {
     keyInput.placeholder = 'sk-…' + apiKey.slice(-4);
+    showKeyState(apiKey);
   }
 });
 
@@ -24,6 +27,7 @@ saveBtn.addEventListener('click', () => {
   chrome.storage.local.set({ apiKey: value }, () => {
     keyInput.value = '';
     keyInput.placeholder = 'sk-…' + value.slice(-4);
+    showKeyState(value);
     showStatus('Saved.', 'ok');
   });
 });
@@ -39,4 +43,10 @@ function showStatus(msg, type) {
     status.textContent = '';
     status.className = 'hint';
   }, 3000);
+}
+
+// Persistent indicator that a key is stored (popup only).
+function showKeyState(apiKey) {
+  if (!keyState) return;
+  keyState.textContent = '✓ Key saved (…' + apiKey.slice(-4) + ')';
 }

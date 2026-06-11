@@ -1,0 +1,373 @@
+[
+  {
+    "_section": "============ CATEGORY 1: COMPANY FINANCIALS (your top context) ============"
+  },
+  {
+    "id": "fin-001",
+    "label": "Large-cap tech revenue — typical for mega-cap",
+    "number": "$124.3 billion",
+    "context": "Today Apple is reporting our best quarter ever, with revenue of $124.3 billion, up 4 percent from a year ago. Apple posted quarterly revenue of $124.3 billion, up 4 percent year over year, and quarterly diluted earnings per share of $2.40.",
+    "url": "https://www.sec.gov/Archives/edgar/data/0000320193/000032019325000007/a8-kex991q1202512282024.htm",
+    "industry": "tech",
+    "expected_direction": "average",
+    "verdict_keywords": ["typical for a mega-cap", "average for mega-cap", "in line with peers", "normal for that peer group", "comparable to other mega-cap", "not unusual for a trillion-dollar company"],
+    "reference_class_keywords": ["mega-cap tech", "trillion-dollar companies", "apple", "microsoft", "alphabet", "amazon", "quarterly revenue", "big tech peers"],
+    "notes": "Apple fiscal Q1 2025 (quarter ended Dec 28, 2024), reported Jan 30, 2025. $124.3B is an all-time record FOR APPLE, but against the mega-cap tech peer group (Apple, Microsoft, Alphabet, Amazon all post tens-to-100+ billions per quarter) it is squarely average — not large. This is the non-obvious-reference-class case: against ALL companies it is enormous, but the proper reference class is mega-cap tech, where it is typical. Large-currency case."
+  },
+  {
+    "id": "fin-002",
+    "label": "Startup ARR — small but normal for stage",
+    "number": "$22 million",
+    "context": "Prismatic just today closed a funding round — a $22 million Series B — led by Five Elms Capital, the Kansas City–based growth equity firm, bringing Prismatic's total raised to $34 million. The new cash will be put toward growing the startup's ~50-person team.",
+    "url": "https://techcrunch.com/2024/01/17/prismatic-lands-22m-to-connect-disparate-b2b-saas-apps/",
+    "industry": "saas",
+    "expected_direction": "average",
+    "verdict_keywords": ["normal for a series b", "typical for the stage", "average for a series b saas", "in line with stage benchmarks", "standard series b round", "right in the range"],
+    "reference_class_keywords": ["series b", "saas startup", "early-stage", "venture-backed", "funding stage", "b2b saas round size"],
+    "must_search": true,
+    "notes": "Prismatic, B2B SaaS (iPaaS) startup, $22M Series B led by Five Elms Capital, Jan 2024. A $22M raise is tiny in absolute corporate terms but squarely normal for a Series B SaaS round (industry benchmarks put Series B rounds at roughly $20-50M, median ~$26-30M in 2024). Reference class is stage-specific, not all companies. Small-currency case + stage-specific reference class. A web search IS needed here — specific startup round/ARR figures are not reliably in memory and vary by company. The article discloses the round size but does not publish an exact ARR dollar figure, so the verified number is the $22M Series B round."
+  },
+  {
+    "id": "fin-003",
+    "label": "Acquisition price — large for the industry",
+    "number": "$35.3 billion",
+    "context": "Capital One Financial Corporation (NYSE: COF) and Discover Financial Services (NYSE: DFS) today announced that they have entered into a definitive agreement under which Capital One will acquire Discover in an all-stock transaction valued at $35.3 billion.",
+    "url": "https://www.sec.gov/Archives/edgar/data/0000927628/000119312524039233/d772981dex991.htm",
+    "industry": "fintech",
+    "expected_direction": "large",
+    "verdict_keywords": ["large for the industry", "one of the biggest", "among the largest fintech deals", "huge for payments", "blockbuster deal", "one of the largest banking acquisitions"],
+    "reference_class_keywords": ["fintech m&a", "payments industry", "bank acquisitions", "financial services deals", "credit card industry", "card network mergers"],
+    "notes": "Capital One's all-stock acquisition of Discover, announced Feb 19, 2024 (SEC 8-K exhibit 99.1). At $35.3B it was the largest fintech/payments M&A deal of 2024 and one of the biggest financial-services acquisitions in years — clearly large for the industry. Large-currency case."
+  },
+  {
+    "id": "fin-004",
+    "label": "Finance/banking ratio or multiple",
+    "number": "14.5%",
+    "context": "Basel III common equity Tier 1 capital of $288 billion, Standardized ratio of 14.5% and Advanced ratio of 14.1%. JPMorganChase had $4.4 trillion in assets and $362 billion in stockholders' equity as of December 31, 2025.",
+    "url": "https://www.sec.gov/Archives/edgar/data/19617/000162828026001902/a4q25erfexhibit991narrative.htm",
+    "industry": "finance",
+    "expected_direction": "average",
+    "verdict_keywords": ["healthy", "well above requirements", "solid", "typical for a large bank", "comfortable", "strong but normal"],
+    "reference_class_keywords": ["cet1 ratio", "capital ratio", "tier 1", "ratio", "multiple", "bank capital"],
+    "notes": "JPMorgan's Q4 2025 Standardized CET1 ratio of 14.5% is well above regulatory minimums (~11-12% including buffers) but in line with the 13-15% range typical of large U.S. G-SIBs — so it reads as 'healthy/average-to-strong for the reference class,' not extreme. Covers the finance industry and the ratio/multiple number-type; tests judging a percentage against a bank-capital reference class rather than against raw size."
+  },
+
+  {
+    "_section": "============ CATEGORY 2: GROWTH RATES / PERCENTAGES (your CAGR context) ============"
+  },
+  {
+    "id": "growth-001",
+    "label": "Strong CAGR for mature industry",
+    "number": "7.55%",
+    "context": "Coca-Cola's 5-year revenue compound annual growth rate is 7.55%. Coca-Cola's revenue has grown slower (7.75% per year) than the US Beverages - Non-Alcoholic industry average (9.22%).",
+    "url": "https://www.financecharts.com/stocks/KO/income-statement/revenue-cagr",
+    "industry": "consumer goods",
+    "expected_direction": "large",
+    "verdict_keywords": ["strong for a mature industry", "high for consumer goods", "above-average for a low-growth sector", "impressive for a mature beverage company", "robust given the industry", "good growth for a legacy company"],
+    "reference_class_keywords": ["mature industry", "consumer goods", "beverages", "low-growth sector", "legacy company", "cpg", "revenue cagr"],
+    "notes": "Coca-Cola 5-year revenue CAGR ~7.5%. For a mature, slow-growth consumer-goods/beverage giant, mid-to-high single-digit CAGR is strong — most legacy CPG names grow low single digits. The SAME ~7.5% CAGR would be mediocre-to-poor in tech, where growth-stage and even large-cap software firms routinely post 15-40%+ growth. Percentage/growth case; reference-class-dependent verdict (strong in CPG, weak in tech)."
+  },
+  {
+    "id": "growth-002",
+    "label": "Mediocre growth rate for tech",
+    "number": "8%",
+    "context": "Fourth quarter revenue of $10.0 billion, up 8% Y/Y, up 9% in constant currency (\"CC\"), inclusive of subscription & support revenue of $9.5 billion, up 8% Y/Y, up 9% in CC. FY25 revenue of $37.9 billion, up 9% both Y/Y & in CC.",
+    "url": "https://www.sec.gov/Archives/edgar/data/0001108524/000110852425000002/crm-q4fy25xexhibit991.htm",
+    "industry": "tech",
+    "expected_direction": "small",
+    "verdict_keywords": ["modest for tech", "below-par for software", "slow for a tech company", "low by tech standards", "weak growth for saas", "underwhelming for the sector", "decelerating"],
+    "reference_class_keywords": ["tech companies", "software", "saas", "enterprise software", "high-growth sector", "tech peers", "cloud revenue growth"],
+    "notes": "Salesforce Q4 FY25 (quarter ended Jan 31, 2025; reported Feb 26, 2025): revenue $10.0B up 8% Y/Y, full-year FY25 up 9%. Single-digit YoY growth is modest/below-par BY TECH STANDARDS — high-growth software and AI peers often post 20-40%+, and this reflects Salesforce's maturation/deceleration. Against all industries 8% is fine, but the proper reference class (tech/SaaS) makes it small. Percentage/growth case; non-obvious reference class."
+  },
+
+  {
+    "_section": "============ CATEGORY 3: BIOTECH / PHARMA ============"
+  },
+  {
+    "id": "bio-001",
+    "label": "Clinical trial success rate",
+    "number": "9.6%",
+    "context": "The overall likelihood of approval (LOA) from Phase I for all developmental candidates in the 2011-2020 period was 9.6%. Among 14 major disease areas, Hematology had the highest LOA from Phase I (26.1%) and Oncology had the lowest (5.1%).",
+    "url": "https://www.bio.org/clinical-development-success-rates-and-contributing-factors-2011-2020",
+    "industry": "biotech",
+    "expected_direction": "small",
+    "verdict_keywords": ["small", "low", "below average", "typical and low", "roughly the industry baseline"],
+    "reference_class_keywords": ["clinical trial", "success rate", "likelihood of approval", "phase 1", "phase i", "drug development", "probability of success"],
+    "notes": "Phase specificity matters: 9.6% is the Phase I-to-approval LOA; later-phase rates are much higher (Phase III-to-approval is ~50-60%). Judged against the 'Phase I->approval' reference class this is the well-known ~10% baseline, so it reads as 'small/low' in absolute terms but is essentially the canonical industry figure. Memory plausibly suffices here (the ~10% Phase I figure is widely cited), but the exact 9.6% needs the BIO 2011-2020 report to verify. This is the 'memory should suffice' coverage case."
+  },
+  {
+    "id": "bio-002",
+    "label": "Drug pricing",
+    "number": "$3.5 million",
+    "context": "On 22 November, the US Food and Drug Administration (FDA) approved the first gene therapy for the genetic blood-clotting disorder haemophilia B—a one-time treatment that costs US$3.5 million. But the treatment's hefty price tag makes it the most expensive drug in the world.",
+    "url": "https://www.scientificamerican.com/article/3-5-million-hemophilia-gene-therapy-is-worlds-most-expensive-drug/",
+    "industry": "pharma",
+    "expected_direction": "large",
+    "verdict_keywords": ["large", "extremely high", "most expensive", "far above", "outlier"],
+    "reference_class_keywords": ["drug", "treatment", "price", "annual cost", "list price", "therapy", "medicine"],
+    "notes": "Hemgenix (CSL Behring) one-time gene therapy for hemophilia B, priced at $3.5M, explicitly described as the most expensive drug in the world at approval. Large-currency case. Even within the gene-therapy reference class it sat at the top end at the time. Article is from Dec 2022; price still widely cited 2024-2026."
+  },
+
+  {
+    "_section": "============ CATEGORY 4: MANUFACTURING / INDUSTRIAL ============"
+  },
+  {
+    "id": "mfg-001",
+    "label": "Capital expenditure for industrial company",
+    "number": "more than US$65 billion",
+    "context": "the third fab brings TSMC's total capital expenditure for the Phoenix, Arizona site to more than US$65 billion, making the site the largest foreign direct investment in Arizona history, and the largest foreign direct investments in a greenfield project in U.S. history.",
+    "url": "https://www.sec.gov/Archives/edgar/data/1046179/000104617924000040/a20240408.htm",
+    "industry": "manufacturing",
+    "expected_direction": "large",
+    "verdict_keywords": ["large", "huge", "record", "largest", "far above", "outlier"],
+    "reference_class_keywords": ["capital expenditure", "capex", "investment", "plant", "fab", "factory", "manufacturing site"],
+    "notes": "TSMC Arizona total site capex of >$65B, from TSMC's own SEC Form 6-K (Apr 8, 2024). Explicitly framed as the largest greenfield FDI in U.S. history, so it is a large/outlier figure relative to typical single-site industrial capex (most plant investments are hundreds of millions to a few billion). Large-currency case."
+  },
+  {
+    "id": "mfg-002",
+    "label": "Operating margin",
+    "number": "20.2%",
+    "context": "Operating profit margin was 20.2% in 2024, compared with 19.3% in 2023. Adjusted operating profit margin was 20.7% in 2024, compared with 20.5% in 2023. Full-year profit was $22.05 per share in 2024.",
+    "url": "https://www.caterpillar.com/content/dam/caterpillarDotCom/releases/4q24/4q24-caterpillar-inc-financial-results.pdf",
+    "industry": "manufacturing",
+    "expected_direction": "large",
+    "verdict_keywords": ["large", "high", "above average", "strong", "above sector norm"],
+    "reference_class_keywords": ["operating margin", "operating profit margin", "industrial", "manufacturer", "heavy equipment", "sector"],
+    "notes": "Caterpillar full-year 2024 GAAP operating profit margin of 20.2%, from Caterpillar's official 4Q 2024 earnings release (Jan 30, 2025). Percentage case. Industrial/heavy-equipment operating margins typically run roughly 8-15%, so ~20% is above the sector norm and reads as 'large/high' for a capital-goods manufacturer."
+  },
+
+  {
+    "_section": "============ CATEGORY 5: NEWS / GENERAL (your reading-news context) ============"
+  },
+  {
+    "id": "news-001",
+    "label": "Government spending figure",
+    "number": "$47.1 billion",
+    "context": "Congress gave the National Institutes of Health (NIH) an essentially flat budget of $47.1 billion in a final 2024 spending bill that lawmakers approved to avert a partial government shutdown. Lawmakers say their bill provides a $300 million increase.",
+    "url": "https://www.science.org/content/article/final-nih-budget-2024-essentially-flat",
+    "industry": "policy",
+    "expected_direction": "large",
+    "verdict_keywords": ["large", "huge", "tens of billions", "major agency budget", "above average"],
+    "reference_class_keywords": ["budget", "spending", "federal", "appropriation", "agency funding", "nih"],
+    "notes": "NIH FY2024 enacted budget of $47.1B, reported by Science (AAAS). Large-currency case. Relative to a single federal agency's annual appropriation this is large (NIH is among the biggest non-defense discretionary funders), though it is essentially flat year-over-year. Direction is 'large' against the reference class of agency budgets; note it is tiny relative to the ~$6T total federal budget, so reference-class framing matters."
+  },
+  {
+    "id": "news-002",
+    "label": "Poll percentage or survey result",
+    "number": "36%",
+    "context": "President Donald Trump's job approval rating has fallen five percentage points to 36%, the lowest of his second term, while disapproval has risen to 60%. The latest decline follows three months of stability, with 40% to 41% of Americans expressing approval.",
+    "url": "https://news.gallup.com/poll/699221/trump-approval-rating-drops-new-second-term-low.aspx",
+    "industry": "polling",
+    "expected_direction": "small",
+    "verdict_keywords": ["small", "low", "below average", "below typical approval", "historically low"],
+    "reference_class_keywords": ["poll", "survey", "approval", "approval rating", "respondents", "job approval"],
+    "notes": "Gallup poll (Nov 3-25, 2025; n=1,321; +/-3 pts), Trump second-term-low 36% approval. Percentage case with a headcount detail (sample of 1,321 adults). Presidential approval typically ranges ~38-55%, so 36% is on the low end of the reference class and is described as a second-term low approaching his all-time low of 34%."
+  },
+  {
+    "id": "energy-001",
+    "label": "Energy project figure — record annual solar additions",
+    "number": "50 GW",
+    "context": "The United States installed a record-breaking 50 GW of new solar capacity in 2024, the largest single year of new capacity added to the grid by any energy technology in over two decades. Developers installed more than 16 GW in Q4 alone.",
+    "url": "https://www.solarpowerworldonline.com/2025/03/the-u-s-installed-record-breaking-50-gw-of-new-solar-capacity-in-2024/",
+    "industry": "energy",
+    "expected_direction": "large",
+    "verdict_keywords": ["large", "record", "huge", "largest", "above average annual addition"],
+    "reference_class_keywords": ["solar", "capacity", "gigawatts", "gw", "installed capacity", "annual additions", "grid"],
+    "notes": "U.S. 2024 new solar capacity of 50 GW, per SEIA/Wood Mackenzie via Solar Power World. Explicitly a record annual addition (largest single-year capacity addition by any energy technology in 20+ years), so it is 'large' relative to the reference class of annual new-capacity additions. Quantity/headcount-style case (GW). Covers the energy industry."
+  },
+
+  {
+    "_section": "============ CATEGORY 6: AI / TECH-SPECIFIC (you read lots of this) ============"
+  },
+  {
+    "id": "ai-001",
+    "label": "AI company valuation",
+    "number": "$380 billion",
+    "context": "We have raised $30 billion in Series G funding led by GIC and Coatue, valuing Anthropic at $380 billion post-money. The round was co-led by D. E. Shaw Ventures, Dragoneer, Founders Fund, ICONIQ, and MGX.",
+    "url": "https://www.anthropic.com/news/anthropic-raises-30-billion-series-g-funding-380-billion-post-money-valuation",
+    "industry": "ai",
+    "expected_direction": "large",
+    "verdict_keywords": ["among the largest", "one of the most valuable", "exceptionally large", "top private", "frontier ai leader", "huge"],
+    "reference_class_keywords": ["valuation", "startup", "funding round", "private company", "ai company", "post-money"],
+    "must_search": true,
+    "notes": "Fast-moving figure: Anthropic's valuation climbed from $183B (Series F, Sep 2025) to $380B (Series G, early 2026). Because AI valuations move fast, searched=true is expected and correct — 'from memory' is likely stale. $380B is enormous relative to nearly all private companies, behind only a handful like OpenAI and SpaceX. This is the 'requires web search' coverage case."
+  },
+  {
+    "id": "ai-002",
+    "label": "Model parameter count or context window",
+    "number": "2 million tokens",
+    "context": "Gemini 1.5 Pro 2M context window, code execution capabilities, and Gemma 2 are available today. We announced the longest ever context window of 2 million tokens at Google I/O in May behind a waitlist, and today we are opening up access.",
+    "url": "https://developers.googleblog.com/en/new-features-for-the-gemini-api-and-google-ai-studio/",
+    "industry": "ai",
+    "expected_direction": "large",
+    "verdict_keywords": ["very large", "among the largest", "frontier", "unusually long", "industry-leading context", "biggest"],
+    "reference_class_keywords": ["context window", "tokens", "model", "parameters", "context length"],
+    "notes": "A 2M-token context window is at the very top end of mainstream LLM context lengths; most production models in 2024-2026 sit at 128K-1M tokens, so 2M is large relative to the norm. Google later offered 1M on Gemini 2.5 Pro with 2M 'coming soon,' so 2M remains a high-water mark for the reference class."
+  },
+
+  {
+    "_section": "============ CATEGORY 7: EDGE CASES — TEST RESILIENCE ============"
+  },
+  {
+    "id": "edge-001",
+    "label": "Extremely large number (test for hyperbole/confidence)",
+    "number": "$4 trillion",
+    "context": "Back in the U.S., stock market darling and semiconductor juggernaut Nvidia became the first company with a $4 trillion valuation. Shares rose 1.8% on Wednesday hitting a share price of $162.86. Nvidia beat other legendary tech giants Apple and Microsoft to the $4 trillion mark.",
+    "url": "https://fortune.com/2025/07/09/markets-today-nvidia-4-trillion-market-cap/",
+    "industry": "finance",
+    "expected_direction": "large",
+    "verdict_keywords": ["largest", "unprecedented", "first ever", "record", "exceptional", "most valuable", "top"],
+    "reference_class_keywords": ["market cap", "market capitalization", "company valuation", "public company", "stock"],
+    "notes": "Extreme outlier: in July 2025 Nvidia became the first company in history to reach a $4 trillion market cap, ahead of Apple and Microsoft. A correct verdict should confidently flag this as the largest/most-extreme in its class without hedging. Tests whether the model expresses appropriate confidence on a genuine record-setter."
+  },
+  {
+    "id": "edge-002",
+    "label": "Tiny number with deceptive precision",
+    "number": "1 to 3 in 1,000 (about 0.1-0.3%)",
+    "context": "Measles can be serious. About 1 in 5 unvaccinated people in the U.S. who get measles is hospitalized. Nearly 1 to 3 of every 1,000 children who become infected with measles will die from respiratory and neurologic complications.",
+    "url": "https://www.cdc.gov/measles/about/index.html",
+    "industry": "healthcare",
+    "expected_direction": "small",
+    "verdict_keywords": ["small as a rate", "low percentage", "but significant", "but consequential", "serious despite the small number", "not trivial", "matters at population scale"],
+    "reference_class_keywords": ["mortality rate", "case fatality", "death rate", "percentage", "disease"],
+    "notes": "A ~0.1-0.3% case-fatality rate is genuinely small AS A RATE — that is the magnitude call, hence expected_direction='small'. The test is whether the verdict ALSO surfaces that a small rate is significant in impact (thousands of deaths at population scale for a vaccine-preventable disease). The two axes are deliberately separated: magnitude=small (direction), significance=high (rewarded via keywords like 'but significant'/'consequential'). Keywords intentionally avoid asserting the number is 'large' so they don't contradict the magnitude bucket. Tests whether context overrides surface size."
+  },
+  {
+    "id": "edge-003",
+    "label": "Thin context — minimal surrounding text",
+    "number": "$2.5 billion",
+    "context": "run-rate over $2.5 billion",
+    "url": "https://www.anthropic.com/news/anthropic-raises-30-billion-series-g-funding-380-billion-post-money-valuation",
+    "industry": "ai",
+    "expected_direction": "large",
+    "verdict_keywords": ["large", "substantial", "significant revenue", "sizable", "uncertain without more context"],
+    "reference_class_keywords": ["run-rate revenue", "revenue", "annualized", "product line"],
+    "notes": "Deliberately terse context (<50 chars). The real figure is Claude Code's run-rate revenue of over $2.5 billion (from the Anthropic Series G post), but the stripped fragment hides whether it is revenue, a deal, or a fund. Tests graceful degradation under sparse context — the model should reason about plausible reference classes and may reasonably flag the missing framing. Thin-context coverage case."
+  },
+  {
+    "id": "edge-004",
+    "label": "Ambiguous reference class — number could belong to multiple categories",
+    "number": "$500 billion",
+    "context": "OpenAI became the most valuable privately held company in the world on Thursday, after a private stock sale of $6.6 billion in shares valued the company at $500 billion.",
+    "url": "https://techcrunch.com/2025/10/06/sam-altman-says-chatgpt-has-hit-800m-weekly-active-users/",
+    "industry": "ai",
+    "expected_direction": "large",
+    "verdict_keywords": ["large", "among the largest", "record valuation", "depends on framing", "most valuable", "ambiguous"],
+    "reference_class_keywords": ["valuation", "deal size", "share sale", "revenue", "funding"],
+    "notes": "Ambiguous framing: '$500 billion' here is a company valuation set via an employee share sale, but the same figure could be misread as a deal/transaction size or revenue depending on the sentence read. A good verdict should resolve which reference class applies (valuation) before judging; tests reading the context to disambiguate valuation vs deal vs revenue."
+  },
+
+  {
+    "_section": "============ CATEGORY 8: FAILURE-MODE PROBES ============"
+  },
+  {
+    "id": "fail-001",
+    "label": "Year-like number that should still calibrate",
+    "number": "1,800",
+    "context": "Target announced it is eliminating about 1,800 corporate positions in an effort to streamline decision-making. About 1,000 employees are expected to receive layoff notices, and the company also plans to eliminate about 800 vacant jobs.",
+    "url": "https://www.cnbc.com/2025/10/23/target-layoffs-corporate-jobs-sales-slump.html",
+    "industry": "retail",
+    "expected_direction": "large",
+    "verdict_keywords": ["large layoff", "significant cut", "sizable", "major round", "substantial", "big"],
+    "reference_class_keywords": ["job cuts", "layoffs", "corporate positions", "headcount", "workforce reduction"],
+    "notes": "1,800 reads like a year but is actually a count of eliminated corporate jobs (Target's first major layoffs in a decade, ~8% of corporate workforce). Tests that the model does not mistake the figure for a date and instead calibrates it as a large layoff within the reference class of single-company corporate job cuts. Also serves as a headcount case."
+  },
+  {
+    "id": "fail-002",
+    "label": "Unit ambiguity",
+    "number": "800 million",
+    "context": "OpenAI CEO Sam Altman said Monday that ChatGPT has reached 800 million weekly active users. \"More than 800 million people use ChatGPT every week, and we process over 6 billion tokens per minute on the API.\"",
+    "url": "https://techcrunch.com/2025/10/06/sam-altman-says-chatgpt-has-hit-800m-weekly-active-users/",
+    "industry": "ai",
+    "expected_direction": "large",
+    "verdict_keywords": ["very large user base", "among the largest", "massive", "enormous reach", "huge", "top consumer product"],
+    "reference_class_keywords": ["weekly active users", "users", "user base", "consumer app", "audience"],
+    "notes": "The unit is the whole point: '800 million' is weekly active USERS, not dollars, miles, or revenue. Only the context ('people use ChatGPT every week') disambiguates the unit. Tests that the model reads the unit from context before judging; 800M WAU is huge for a consumer-product reference class. Also serves as the user-count case."
+  },
+  {
+    "id": "fail-003",
+    "label": "Number that defies easy classification (no good reference class)",
+    "number": "15 billion miles",
+    "context": "NASA has shut off a key science instrument onboard the Voyager 1 spacecraft, to help it continue its journey into deep space, over 25 billion km (15 billion miles) from Earth. Voyager 1 is the most distant object ever built by humanity.",
+    "url": "https://www.skyatnightmagazine.com/news/voyager-1-low-energy-charged-particles-experiment-shut-down",
+    "industry": "science",
+    "expected_direction": "uncertain",
+    "verdict_keywords": ["uncertain", "varies", "depends", "limited comparison data", "no clear reference class", "unique", "hard to classify"],
+    "reference_class_keywords": ["distance", "spacecraft", "interstellar", "miles from earth", "human-made object"],
+    "notes": "Voyager 1's distance (~15 billion miles / 25 billion km) is a genuine oddball: it is literally the most distant human-made object, so its only 'peers' are Voyager 2 and a few other probes — there is essentially no clean reference class for a sizing judgment. expected_direction is 'uncertain', a 4th value beyond large/average/small, BECAUSE the whole point of this probe is the absence of a clean reference class — rewarding a confident 'large' would contradict the hedge keywords and defeat the test. If your harness enforces a strict 3-value enum, map 'uncertain' to your no-call/abstain sentinel. An honest hedge such as 'limited comparison data / unique case' is the acceptable answer. This is the 'we don't know cleanly' coverage case."
+  },
+
+  {
+    "_section": "============ COVERAGE MATRIX — make sure your filled cases hit these ============",
+    "_coverage": {
+      "industries": [
+        "tech / SaaS",
+        "biotech / pharma",
+        "manufacturing / industrial",
+        "finance / banking",
+        "consumer / retail",
+        "energy",
+        "AI / ML"
+      ],
+      "number_types": [
+        "currency (large)",
+        "currency (small)",
+        "percentage / growth rate",
+        "headcount / user count",
+        "ratio / multiple (e.g., P/E)",
+        "time-based (e.g., 18-month timeline)"
+      ],
+      "magnitude_spread": [
+        "obvious large",
+        "obvious small",
+        "borderline / ambiguous",
+        "extreme outlier"
+      ],
+      "context_quality": [
+        "rich context (full sentence around it)",
+        "thin context (~50 chars)",
+        "context with multiple numbers nearby"
+      ],
+      "must_have_at_least_one": [
+        "case requiring web search (recent valuation, etc.)",
+        "case where memory should suffice (well-known historical figure)",
+        "case where the right answer is 'we don't know cleanly'"
+      ]
+    },
+    "_coverage_audit": {
+      "industries": {
+        "tech / SaaS": ["fin-001", "fin-002", "growth-002"],
+        "biotech / pharma": ["bio-001", "bio-002"],
+        "manufacturing / industrial": ["mfg-001", "mfg-002"],
+        "finance / banking": ["fin-003", "fin-004", "edge-001"],
+        "consumer / retail": ["growth-001", "fail-001"],
+        "energy": ["energy-001"],
+        "AI / ML": ["ai-001", "ai-002", "edge-003", "edge-004", "fail-002"]
+      },
+      "number_types": {
+        "currency (large)": ["fin-001", "fin-003", "mfg-001", "news-001", "ai-001", "edge-001"],
+        "currency (small)": ["fin-002", "edge-003"],
+        "percentage / growth rate": ["growth-001", "growth-002", "bio-001", "mfg-002", "news-002", "edge-002"],
+        "headcount / user count": ["fail-001", "fail-002", "energy-001"],
+        "ratio / multiple": ["fin-004"],
+        "time-based": ["NOTE: not explicitly covered — consider adding an 18-month-timeline case if needed"]
+      },
+      "magnitude_spread": {
+        "obvious large": ["fin-003", "mfg-001", "bio-002", "ai-001"],
+        "obvious small": ["bio-001", "news-002", "growth-002"],
+        "borderline / ambiguous": ["fin-001", "fin-004", "edge-004"],
+        "extreme outlier": ["edge-001", "fail-003"]
+      },
+      "context_quality": {
+        "rich context": ["fin-001", "bio-002", "news-001", "fail-001"],
+        "thin context (~50 chars)": ["edge-003"],
+        "context with multiple numbers nearby": ["fin-004", "growth-002", "news-002", "fail-001"]
+      },
+      "must_have_at_least_one": {
+        "requires web search": ["ai-001", "fin-002"],
+        "memory should suffice": ["bio-001"],
+        "we don't know cleanly": ["fail-003"]
+      }
+    }
+  }
+]

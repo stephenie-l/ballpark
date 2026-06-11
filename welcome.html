@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Start using Ballpark</title>
+  <link rel="stylesheet" href="welcome.css" />
+</head>
+<body>
+  <main class="page">
+    <header class="hero">
+      <img src="icons/ballpark_128.png" alt="" class="logo" width="56" height="56" />
+      <h1>Start using <span class="brand">Ballpark</span></h1>
+      <p class="tagline">
+        Calibrate unfamiliar numbers as you read. Ballpark underlines figures on
+        any page — click one to see whether it's <em>large</em>, <em>small</em>,
+        or <em>typical</em> for its context, with comparisons.
+      </p>
+    </header>
+
+    <ol class="steps">
+      <li class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h2>Add your Anthropic API key</h2>
+          <p class="step-text">
+            Ballpark is bring-your-own-key: calibrations run on
+            <strong>your</strong> Anthropic account, so your reading never
+            touches our servers. You only pay Anthropic for what you use
+            (calibrations use the low-cost Haiku model — typically a fraction of
+            a cent each).
+          </p>
+          <div class="input-row">
+            <input
+              type="password"
+              id="api-key"
+              placeholder="sk-ant-..."
+              autocomplete="off"
+              spellcheck="false"
+            />
+            <button id="save-btn">Save key</button>
+          </div>
+          <p class="hint" id="save-status"></p>
+          <p class="hint">
+            Don't have one?
+            <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener noreferrer">Create an API key →</a>
+            (sign in, then <em>Create Key</em>). The key starts with
+            <code>sk-ant-</code>.
+          </p>
+        </div>
+      </li>
+
+      <li class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h2>Pin Ballpark to your toolbar</h2>
+          <p class="step-text">
+            So you can re-open these settings anytime: click the
+            <strong>puzzle-piece icon</strong> (Extensions) at the top-right of
+            Chrome, then click the <strong>pin</strong> next to Ballpark. The
+            Ballpark icon now stays in your toolbar — click it to update your
+            key.
+          </p>
+        </div>
+      </li>
+
+      <li class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h2>Start reading</h2>
+          <p class="step-text">
+            Open any article with numbers in it. Numbers Ballpark recognizes get
+            a <span class="demo-underline">dotted underline</span> — click one to
+            calibrate it.
+          </p>
+        </div>
+      </li>
+    </ol>
+  </main>
+
+  <script src="popup.js"></script>
+</body>
+</html>

@@ -4,7 +4,8 @@
   "private": true,
   "description": "Dev tooling for the Ballpark extension. Not shipped — the extension itself has no build step or dependencies.",
   "scripts": {
-    "test": "node --test"
+    "test": "node --test",
+    "eval": "node eval/calibration-eval.mjs"
   },
   "devDependencies": {
     "jsdom": "^25.0.0"

@@ -3,6 +3,15 @@
 
 import { calibrate } from './lib/api.js';
 
+// First-run onboarding: Web Store installs are unpinned by default and the
+// popup is easy to miss, so on a fresh install we open a welcome tab that walks
+// the user through adding their Anthropic API key and pinning the toolbar icon.
+chrome.runtime.onInstalled.addListener(({ reason }) => {
+  if (reason === 'install') {
+    chrome.tabs.create({ url: chrome.runtime.getURL('welcome.html') });
+  }
+});
+
 let cachedPrompt = null;
 
 async function loadPrompt() {
