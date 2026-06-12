@@ -19,5 +19,15 @@
     "tier": "hard",
     "pending": "spec2",
     "page": { "expected": "suppress", "gate": "gate1-communication" }
+  },
+  {
+    "file": "job-listing.html",
+    "tier": "soft",
+    "page": { "expected": "run", "gate": "none" }
+  },
+  {
+    "file": "real-estate-listing.html",
+    "tier": "soft",
+    "page": { "expected": "suppress", "gate": "gate2-commerce" }
   }
 ]
