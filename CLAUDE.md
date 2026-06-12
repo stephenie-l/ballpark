@@ -37,13 +37,33 @@ Every resubmission needs a bumped `manifest.json` `version` or the Web Store rej
 
 ## Testing
 
-Run with `npm test` (Node's built-in runner — no Jest/Vitest, `jsdom` is the only dev dependency). Testing splits into two tiers with opposite economics; keep them separate.
+Run with `npm test` (Node's built-in runner — no Jest/Vitest, `jsdom` is the only dev dependency). Testing splits into three tiers; keep them separate.
 
 **Tier 1 — deterministic logic (DONE).** `test/detector.test.js` covers `lib/detector.js`. These are **black-box** tests: load the real content-script IIFE into a jsdom DOM via `window.eval`, run `underlineAll`, and assert which numbers came out underlined. They never touch the IIFE's internals, so refactors are safe as long as observable behavior holds. Conventions worth preserving:
 - A known bug is recorded as a **`todo` test asserting the *correct* behavior**, never as a passing test that bakes in the buggy output. Flip `todo` → real test when fixing (see the decimal-numbers fix in git history for the pattern).
 - The detector is fiddly (regex + exclusion heuristics) and degrades silently, so any change there should run against these cases. Good follow-on coverage if extending: `api.js`'s `parseResponse` is also pure and worth unit-testing the same way.
 
 **Tier 2 — LLM calibration eval (BUILT).** Fixtures live at `test/fixtures/calibration-cases.json` (22 real cases + `_section` separators); the harness is `eval/calibration-eval.mjs`, run with `ANTHROPIC_API_KEY=sk-ant-... npm run eval`. It feeds each fixture's real `{url, number, context}` to the real `calibrate()` (real prompt + model + parser, so it also exercises the `insufficient_context` path) and checks **acceptance criteria**, not exact strings — *structural* (verdict < 15 words, `reference_class` present, 1–2 comparisons, `searched` is boolean) and *directional* (verdict's large/small/typical matches `expected_direction` via the fixture's `verdict_keywords`; `reference_class` mentions an expected-domain keyword). It **prints a report, never throws** — it's an eval, not a gate. It costs real API tokens and is non-deterministic, so it lives **outside `test/`** (so `npm test` never runs it) and is invoked manually when `prompts/calibration.md` or the model changes. To import the real ESM `api.js` from Node, `lib/package.json` marks `lib/` as `type: module` (dev-only; Chrome ignores it, and it's excluded from the packaging allowlist). Known open items from the last run: the model overshoots the 15-word verdict cap ~18% of the time (prompt-tuning candidate), and several fixtures encode opinionated absolute-vs-peer reference classes the model reasonably differs on (fixture-review candidates, not prompt bugs); no fixture yet exercises the truly-nonsensical `insufficient_context` case.
+
+**Tier 3 — decision-accuracy (FRAMEWORK BUILT, Spec 1).** Answers *"are the
+run/suppress decisions right?"* — a precision/recall concern the other tiers
+don't cover. A labeled page corpus (`test/fixtures/pages/` + `page-labels.json`)
+drives two harnesses that load the real gate + detector IIFEs into jsdom:
+- **Part 1 — `test/gates.test.js` (gating, `npm test`).** Unambiguous cases;
+  asserts the page-level contract `BallparkGates.evaluatePage(document) →
+  { run, gate, reason }` (both `run` *and* the responsible `gate`, so a page
+  suppressed for the wrong reason fails) plus number-level underline/suppress.
+  Cases whose gate isn't implemented yet carry `pending` in the label and run as
+  `todo`.
+- **Part 2 — `eval/decision-eval.mjs` (report-only, `npm run eval:decisions`).**
+  Borderline cases scored as FP/FN with false positives weighted ~3×; prints a
+  report, never throws. No API key needed — decisions are deterministic.
+
+Spec 1 ships the framework with a permissive **stub** `lib/gates.js`; real Gate
+1/2 logic and sanitized real fixtures arrive in Spec 2, Gate 3 in Spec 3. See
+`specs/2026-06-12-decision-accuracy-test-layer.md`. `lib/gates.js` is **not yet
+in `manifest.json` or the packaging allowlist** — it is test-only until Spec 2
+wires it into `content.js`.
 
 ## Two JS execution contexts (the key architectural split)
 

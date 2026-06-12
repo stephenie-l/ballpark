@@ -1,0 +1,33 @@
+[
+  {
+    "file": "article-prose.html",
+    "tier": "hard",
+    "page": { "expected": "run", "gate": "none" },
+    "numbers": [
+      { "text": "$145B", "expected": "underline" },
+      { "text": "40,000", "expected": "underline" }
+    ]
+  },
+  {
+    "file": "bank-dashboard.html",
+    "tier": "hard",
+    "pending": "spec2",
+    "page": { "expected": "suppress", "gate": "gate1-sensitive" }
+  },
+  {
+    "file": "webmail-inbox.html",
+    "tier": "hard",
+    "pending": "spec2",
+    "page": { "expected": "suppress", "gate": "gate1-communication" }
+  },
+  {
+    "file": "job-listing.html",
+    "tier": "soft",
+    "page": { "expected": "run", "gate": "none" }
+  },
+  {
+    "file": "real-estate-listing.html",
+    "tier": "soft",
+    "page": { "expected": "suppress", "gate": "gate2-commerce" }
+  }
+]

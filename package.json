@@ -5,7 +5,8 @@
   "description": "Dev tooling for the Ballpark extension. Not shipped — the extension itself has no build step or dependencies.",
   "scripts": {
     "test": "node --test",
-    "eval": "node eval/calibration-eval.mjs"
+    "eval": "node eval/calibration-eval.mjs",
+    "eval:decisions": "node eval/decision-eval.mjs"
   },
   "devDependencies": {
     "jsdom": "^25.0.0"
