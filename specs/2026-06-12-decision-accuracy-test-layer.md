@@ -273,3 +273,27 @@ implement cycle, all sharing this one corpus as their regression guard:
 
 The popup-won't-open bug in live v1.0.1 is tracked separately (debugging task,
 pending reproduction evidence) and is not part of this spec.
+
+## Notes carried forward (from Spec 1 final review)
+
+Non-blocking observations for whoever authors Spec 2/3 — all are "as the corpus
+grows" refinements, not Spec 1 defects:
+
+1. **Soft eval ignores `page.gate`.** `eval/decision-eval.mjs` scores
+   run/suppress only; it does not assert the responsible gate the way Part 1
+   does. Intentional for Spec 1, but when real gates land, a "right verdict,
+   wrong gate" on a borderline case won't be caught by the soft scoreboard.
+   Decide deliberately whether soft scoring should also check gate-attribution.
+2. **Copy the detector's *exact* `textContent` when writing number labels.** The
+   detector emits quirks — e.g. `$180,000 ` with a trailing space, and it
+   catches only the low end of a `$180,000 – $210,000` range; `article-prose`
+   underlines `$145B` twice (heading + body), which the harness's `Set` masks.
+   Probe `underlineAll` for the literal string rather than guessing, or
+   number-level labels will silently mismatch.
+3. **`article-prose` can't distinguish underline *count* / heading-suppression**
+   (the `$145B` duplication above). If Spec 3 wants to assert counts or that
+   headings are skipped, that fixture needs disambiguating.
+4. **`pct()` denominator is total soft cases, not the relevant base.** `FP-rate`
+   divides by all soft cases, so the rate mechanically shrinks as run-pages are
+   added. When the soft corpus grows, divide FP by the suppress-expected count
+   and FN by the run-expected count for an interpretable rate.
