@@ -169,6 +169,7 @@ Rules:
 {
   "file": "product-aritzia.sanitized.html",
   "tier": "hard",
+  "pending": "spec2",
   "page":   { "expected": "suppress", "gate": "gate2-commerce" },
   "numbers": [
     { "text": "$145",  "expected": "suppress" },
@@ -178,6 +179,10 @@ Rules:
 ```
 
 - `tier`: `"hard"` → exercised by Part 1; `"soft"` → exercised by Part 2.
+- `pending` (optional): present while the responsible gate isn't implemented
+  yet (value names the spec that lands it, e.g. `"spec2"`). Makes Part 1 run the
+  case as `todo` — it executes and reports, but can't fail the suite. Removed
+  when the gate ships, flipping it to a real gating assertion.
 - `page.expected`: `"run"` | `"suppress"`.
 - `page.gate`: which gate *should* be responsible (e.g. `gate1-sensitive`,
   `gate1-communication`, `gate2-commerce`, `none`). Lets a failure report *which*
@@ -240,9 +245,12 @@ Defer to the gate spec that *defines* their behavior:
 
 ## Verification
 
-- `npm test` runs and **fails on the new page-level assertions** (gates not yet
-  implemented) while all existing Tier 1 tests still pass. Red here is success —
-  it proves the harness wires up and the contract is exercised.
+- `npm test` stays **green**: existing Tier 1 tests pass, run-page cases pass,
+  and the not-yet-implemented suppress cases run as `todo` (via the `pending`
+  label) — they execute and are reported, but can't fail the suite. A stub
+  `lib/gates.js` returning a permissive default exists so the harness loads a
+  real IIFE and the contract is exercised; Spec 2 fills it in and removes the
+  `pending` flags, flipping those cases to hard assertions.
 - The number-level hard cases that depend only on *existing* detector behavior
   (e.g. a `$145B` underline) pass immediately; ones needing Gate 3 suppression
   are `todo` until Spec 3.
