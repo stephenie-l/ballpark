@@ -37,7 +37,7 @@ Every resubmission needs a bumped `manifest.json` `version` or the Web Store rej
 
 ## Testing
 
-Run with `npm test` (Node's built-in runner — no Jest/Vitest, `jsdom` is the only dev dependency). Testing splits into two tiers with opposite economics; keep them separate.
+Run with `npm test` (Node's built-in runner — no Jest/Vitest, `jsdom` is the only dev dependency). Testing splits into three tiers; keep them separate.
 
 **Tier 1 — deterministic logic (DONE).** `test/detector.test.js` covers `lib/detector.js`. These are **black-box** tests: load the real content-script IIFE into a jsdom DOM via `window.eval`, run `underlineAll`, and assert which numbers came out underlined. They never touch the IIFE's internals, so refactors are safe as long as observable behavior holds. Conventions worth preserving:
 - A known bug is recorded as a **`todo` test asserting the *correct* behavior**, never as a passing test that bakes in the buggy output. Flip `todo` → real test when fixing (see the decimal-numbers fix in git history for the pattern).
