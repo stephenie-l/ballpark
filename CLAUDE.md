@@ -10,14 +10,18 @@ The extension is published on the Chrome Web Store; end users install it from th
 
 ## Redesign status — Workstream B (calibration-worthiness)
 
-Ballpark is mid-redesign to trigger on a number's **calibration-worthiness**, not its mere presence — via three coarse→fine gates plus a decision-accuracy test layer and a status/override panel. Progress as of 2026-06-13 (specs + plans in `specs/`):
+Ballpark is mid-redesign to trigger on a number's **calibration-worthiness**, not its mere presence — via three coarse→fine gates plus a decision-accuracy test layer and a status/override panel. Refer to work by **topic** (e.g. "Gate 3"), not by position ("Spec N") — the build order has shifted, so positional numbers mislead. Canonical IDs are the date-prefixed topic-slug files in `specs/`. Status as of 2026-06-13:
 
-- ✅ **Spec 1 — Tier 3 test layer** (decision-accuracy corpus + harness). See `## Testing` below.
-- ✅ **Spec 2 — Gate 1** (surface exclusion): hostname list + editability / control-density / prose-density heuristics; per-site override; popup "This page" panel.
-- ✅ **Spec 3 — Gate 2** (commerce page-type): structured data + real-estate hostname net + article guard.
-- ⏳ **Spec 4 — Gate 3 (NOT BUILT):** per-number triage — the "graspability gap" (`number × scale-word × thing-counted`), cheap-and-local before the API, with a click-time graceful "insufficient context" failure (which also kills the old raw-JSON error). The detector suffix-letter bug (`$3,500 mixed` → `$3,500 m`) folds in here.
+- ✅ **Tier 3 test layer** (decision-accuracy corpus + harness). See `## Testing` below.
+- ✅ **Gate 1** (surface exclusion): hostname list + editability / control-density / prose-density heuristics; per-site override; popup "This page" panel.
+- ✅ **Gate 2** (commerce page-type): structured data + real-estate hostname net + article guard.
+- ⏳ **Gate 3 — NOT BUILT; the next real work.** Per-number triage — the "graspability gap" (`number × scale-word × thing-counted`), cheap-and-local before the API, with a click-time graceful "insufficient context" failure (which also kills the old raw-JSON error). Seed notes (with the perf-eval `fail-003` hedge gap + the detector `$3,500 mixed` → `$3,500 m` bug folded in): `specs/gate3-per-number-triage-notes.md`.
 
-`evaluatePage` funnel order in `lib/gates.js`: Gate 1 hostname list → **Gate 2 commerce** → Gate 1 heuristics. Gates default to suppression when unsure; the override toggle is the safety valve. Known tuning item: prose density is `<p>`-only (over-suppresses `<div>`-paragraph articles — first tuning candidate).
+Gates 1 & 2 shipped together as **v1.1.0** (pending Web Store submission). `evaluatePage` funnel order in `lib/gates.js`: Gate 1 hostname list → **Gate 2 commerce** → Gate 1 heuristics. Gates default to suppression when unsure; the override toggle is the safety valve.
+
+**Descoped (2026-06-13): dedicated cost-reduction work.** Measured ~1.1¢/calibration all-in on a BYO-key model (tokens + web_search; the model self-gates search to ~40% of clicks), with most numbers never clicked + cached — reasonable, and never the product risk. The "Planned: local reference layer" section below stays a *parked* direction, not active work; revisit only if cost or latency becomes a felt complaint.
+
+Tuning items (non-blocking): prose density is `<p>`-only (over-suppresses `<div>`-paragraph articles — first candidate); the 15-word verdict cap overshoots ~23% of the time (`prompts/calibration.md` tweak); several Tier 2 fixtures encode absolute-vs-peer reference classes the model reasonably differs on (fixture curation, not bugs).
 
 ## Developer workflow
 
