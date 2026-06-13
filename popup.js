@@ -66,16 +66,20 @@ const OVERRIDE_LABELS = {
 let activeTabId = null;
 let pageHost = null;
 
-chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
-  if (!tab || tab.id == null) return renderStatus(null);
-  activeTabId = tab.id;
-  chrome.tabs.sendMessage(tab.id, { type: 'GET_STATUS' }, (status) => {
-    // lastError fires when no content script is present (chrome://, web store…).
-    if (chrome.runtime.lastError) return renderStatus(null);
-    if (status) pageHost = status.host;
-    renderStatus(status || null);
+// popup.js is shared with welcome.html, which has no status section and does not
+// load lib/status.js. Only run the panel where it actually exists.
+if (statusLine && typeof BallparkStatus !== 'undefined') {
+  chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
+    if (!tab || tab.id == null) return renderStatus(null);
+    activeTabId = tab.id;
+    chrome.tabs.sendMessage(tab.id, { type: 'GET_STATUS' }, (status) => {
+      // lastError fires when no content script is present (chrome://, web store…).
+      if (chrome.runtime.lastError) return renderStatus(null);
+      if (status) pageHost = status.host;
+      renderStatus(status || null);
+    });
   });
-});
+}
 
 function renderStatus(status) {
   const { line, detail } = BallparkStatus.formatStatus(status);
