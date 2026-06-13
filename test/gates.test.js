@@ -30,6 +30,19 @@ test('evaluatePage returns the { run, gate, reason } contract shape', () => {
   assert.equal(typeof result.reason, 'string', 'reason must be a string');
 });
 
+test('hardcoded host list: suffix match and miss', () => {
+  const listed = (host) => {
+    const dom = new JSDOM('<!DOCTYPE html><body><p>hi</p></body>', {
+      runScripts: 'outside-only', url: `https://${host}/`,
+    });
+    dom.window.eval(GATES_SRC);
+    return dom.window.BallparkGates.evaluatePage(dom.window.document);
+  };
+  assert.equal(listed('mail.google.com').gate, 'gate1-communication');
+  assert.equal(listed('secure.chase.com').gate, 'gate1-sensitive'); // subdomain
+  assert.equal(listed('example.com').run, true); // not listed → runs (for now)
+});
+
 const DETECTOR_SRC = fs.readFileSync(path.join(LIB, 'detector.js'), 'utf8');
 const PAGES_DIR = path.join(__dirname, 'fixtures', 'pages');
 const LABELS = JSON.parse(
