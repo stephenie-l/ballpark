@@ -6,7 +6,22 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Ballpark is a Manifest V3 Chrome extension that helps readers calibrate unfamiliar numbers in place. It underlines numbers on a page; clicking one asks Claude (Haiku 4.5, with optional web search) whether the number is large/small/typical for its inferred reference class, then renders a small card next to it. The framing is **calibration, not verification** — the prompt and UI deliberately steer toward directional/relative answers, not fact-checking. See `README.md` for the product rationale.
 
-The extension is published on the Chrome Web Store (first release was manifest `version` 1.0.0; a `version` 1.0.1 resubmission with live-bug fixes is being prepared as of 2026-06-10); end users install it from there with their own Anthropic API key. The workflow below is for developing the source, not for using the shipped extension.
+The extension is published on the Chrome Web Store; end users install it from there with their own Anthropic API key. Release history: `version` 1.0.0 (first release) → 1.0.1 (live-bug fixes) → **1.1.0** (the first calibration-worthiness redesign release: Gates 1 & 2 + status/override panel + the Tier 3 test layer). As of **2026-06-13**, 1.1.0 is built (`ballpark.zip`, the hand-assembled allowlist of 18 files) and **pending Web Store submission**. The workflow below is for developing the source, not for using the shipped extension.
+
+## Redesign status — Workstream B (calibration-worthiness)
+
+Ballpark is mid-redesign to trigger on a number's **calibration-worthiness**, not its mere presence — via three coarse→fine gates plus a decision-accuracy test layer and a status/override panel. Refer to work by **topic** (e.g. "Gate 3"), not by position ("Spec N") — the build order has shifted, so positional numbers mislead. Canonical IDs are the date-prefixed topic-slug files in `specs/`. Status as of 2026-06-13:
+
+- ✅ **Tier 3 test layer** (decision-accuracy corpus + harness). See `## Testing` below.
+- ✅ **Gate 1** (surface exclusion): hostname list + editability / control-density / prose-density heuristics; per-site override; popup "This page" panel.
+- ✅ **Gate 2** (commerce page-type): structured data + real-estate hostname net + article guard.
+- ⏳ **Gate 3 — NOT BUILT; the next real work.** Per-number triage — the "graspability gap" (`number × scale-word × thing-counted`), cheap-and-local before the API, with a click-time graceful "insufficient context" failure (which also kills the old raw-JSON error). Seed notes (with the perf-eval `fail-003` hedge gap + the detector `$3,500 mixed` → `$3,500 m` bug folded in): `specs/gate3-per-number-triage-notes.md`.
+
+Gates 1 & 2 shipped together as **v1.1.0** (pending Web Store submission). `evaluatePage` funnel order in `lib/gates.js`: Gate 1 hostname list → **Gate 2 commerce** → Gate 1 heuristics. Gates default to suppression when unsure; the override toggle is the safety valve.
+
+**Descoped (2026-06-13): dedicated cost-reduction work.** Measured ~1.1¢/calibration all-in on a BYO-key model (tokens + web_search; the model self-gates search to ~40% of clicks), with most numbers never clicked + cached — reasonable, and never the product risk. The "Planned: local reference layer" section below stays a *parked* direction, not active work; revisit only if cost or latency becomes a felt complaint.
+
+Tuning items (non-blocking): prose density is `<p>`-only (over-suppresses `<div>`-paragraph articles — first candidate); the 15-word verdict cap overshoots ~23% of the time (`prompts/calibration.md` tweak); several Tier 2 fixtures encode absolute-vs-peer reference classes the model reasonably differs on (fixture curation, not bugs).
 
 ## Developer workflow
 
@@ -59,11 +74,11 @@ drives two harnesses that load the real gate + detector IIFEs into jsdom:
   Borderline cases scored as FP/FN with false positives weighted ~3×; prints a
   report, never throws. No API key needed — decisions are deterministic.
 
-Spec 1 ships the framework with a permissive **stub** `lib/gates.js`; real Gate
-1/2 logic and sanitized real fixtures arrive in Spec 2, Gate 3 in Spec 3. See
-`specs/2026-06-12-decision-accuracy-test-layer.md`. `lib/gates.js` is **not yet
-in `manifest.json` or the packaging allowlist** — it is test-only until Spec 2
-wires it into `content.js`.
+Real Gate 1 & Gate 2 logic now lives in `lib/gates.js` (wired into
+`manifest.json` + the packaging allowlist), so the corpus asserts the real
+decisions: `gate1-*` for surfaces, `gate2-commerce` for commerce pages, `none`
+for run-pages. Gate 3 (per-number triage) is **not built** — see the
+"Redesign status" section above and `specs/`.
 
 ## Two JS execution contexts (the key architectural split)
 
