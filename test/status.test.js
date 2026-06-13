@@ -17,16 +17,27 @@ function load() {
   return dom.window.BallparkStatus;
 }
 
-test('formatStatus: ran shows count; suppressed shows reason', () => {
+test('formatStatus: ran (no count); suppressed shows reason', () => {
   const { formatStatus } = load();
 
-  const ran = formatStatus({ run: true, gate: 'none', reason: '', count: 12 });
-  assert.match(ran.line, /Ran/);
-  assert.match(ran.line, /12/);
+  const ran = formatStatus({ run: true, gate: 'none', reason: '', override: undefined });
+  assert.match(ran.line, /on for this page/);
+  assert.doesNotMatch(ran.line, /\d/, 'should not show a number count');
+  assert.equal(ran.detail, '');
 
-  const off = formatStatus({ run: false, gate: 'gate1-interface', reason: 'Looks like an app or dashboard, not an article', count: 0 });
-  assert.match(off.line, /Didn't run/);
+  const off = formatStatus({ run: false, gate: 'gate1-interface', reason: 'Looks like an app or dashboard, not an article', override: undefined });
+  assert.match(off.line, /off here/);
   assert.match(off.detail, /app or dashboard/);
+});
+
+test('formatStatus: override states explain themselves', () => {
+  const { formatStatus } = load();
+
+  const forcedOn = formatStatus({ run: true, gate: 'override-on', reason: '', override: 'force-on' });
+  assert.match(forcedOn.detail, /turned it on/);
+
+  const forcedOff = formatStatus({ run: false, gate: 'override-off', reason: '', override: 'force-off' });
+  assert.match(forcedOff.detail, /turned it off/);
 });
 
 test('formatStatus: inactive page', () => {
