@@ -89,11 +89,16 @@ largest text-bearing block, e.g. `<main>`/`<article>`/the biggest container),
 not the whole document — so a peripheral comment box or a header search field
 doesn't trip them.
 
-- **Scoped editability (near-decisive).** If the dominant content region is
-  `contenteditable` or is/contains a dominant `<input>`/`<textarea>` → suppress
-  `gate1-editable`. Catches composers, Google Docs/Notion, form-authoring.
+- **Scoped editability (near-decisive).** If the dominant content region is (or
+  contains, with almost no article prose) a `contenteditable` region → suppress
+  `gate1-editable`. Catches composers, Google Docs/Notion, rich-text authoring.
   Explicitly ignores small/peripheral editables (a comment composer below an
-  article).
+  article). **`<textarea>` is deliberately *not* an editability signal** — it's
+  usually a form control (API console, search), so it counts toward
+  interactive-control density instead; a textarea-dominant page still suppresses
+  via control/prose density, attributed to `gate1-interface`. (Decided in Spec 2
+  impl: the original `textarea`-in-editability selector mis-routed an API console
+  to `gate1-editable`.)
 - **Interactive-control density (catches Salesforce / dashboards / admin tools /
   API consoles).** Count interactive controls — `button`, `[role=button]`,
   `input`, `select`, `textarea`, and filter/menu controls — within the dominant
