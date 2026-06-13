@@ -8,6 +8,11 @@
 </head>
 <body>
   <div class="container">
+    <section class="section section--status" id="status-section">
+      <p class="status-line" id="status-line">Checking this page…</p>
+      <p class="hint status-detail" id="status-detail"></p>
+      <button class="override-btn" id="override-btn" hidden></button>
+    </section>
     <header class="header">
       <img src="icons/ballpark_48.png" alt="" class="logo" width="28" height="28" />
       <div>
@@ -45,6 +50,7 @@
       </p>
     </section>
   </div>
+  <script src="lib/status.js"></script>
   <script src="popup.js"></script>
 </body>
 </html>

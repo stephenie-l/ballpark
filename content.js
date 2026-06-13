@@ -7,7 +7,7 @@
   const RESCAN_DEBOUNCE_MS = 400;
   let observer = null;
   let rescanTimer = null;
-  let pageStatus = { run: false, gate: 'none', reason: '', count: 0, override: undefined };
+  let pageStatus = { run: false, gate: 'none', reason: '', count: 0, override: undefined, host: '' };
 
   function getOverride(host) {
     return new Promise((resolve) => {
@@ -36,7 +36,7 @@
     const verdict = BallparkGates.evaluatePage(document);
     const override = await getOverride(location.hostname);
     const decision = BallparkGates.applyOverride(verdict, override);
-    pageStatus = { ...decision, count: 0, override };
+    pageStatus = { ...decision, count: 0, override, host: location.hostname };
 
     if (!decision.run) return; // gated off: no scan, no observer, no listeners
 
