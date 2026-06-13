@@ -38,9 +38,11 @@ const LABELS = JSON.parse(
 
 // Load a corpus fixture into a window with gates + detector evaluated, exactly
 // as the extension loads them.
-function loadFixture(file) {
+function loadFixture(file, { url } = {}) {
   const html = fs.readFileSync(path.join(PAGES_DIR, file), 'utf8');
-  const dom = new JSDOM(html, { runScripts: 'outside-only' });
+  const opts = { runScripts: 'outside-only' };
+  if (url) opts.url = url;
+  const dom = new JSDOM(html, opts);
   dom.window.eval(GATES_SRC);
   dom.window.eval(DETECTOR_SRC);
   return dom.window;
@@ -62,7 +64,7 @@ for (const c of hard) {
   // premature pass is reported) but can't fail the suite.
   const opts = c.pending ? { todo: `awaiting ${c.pending}` } : {};
   test(`page decision: ${c.file}`, opts, () => {
-    const window = loadFixture(c.file);
+    const window = loadFixture(c.file, { url: c.url });
     const result = window.BallparkGates.evaluatePage(window.document);
     assert.equal(
       result.run,

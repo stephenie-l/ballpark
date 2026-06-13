@@ -21,8 +21,10 @@ const FP_WEIGHT = 3;
 
 const GATES_SRC = await readFile(path.join(root, 'lib/gates.js'), 'utf8');
 
-function evaluatePage(html) {
-  const dom = new JSDOM(html, { runScripts: 'outside-only' });
+function evaluatePage(html, url) {
+  const opts = { runScripts: 'outside-only' };
+  if (url) opts.url = url;
+  const dom = new JSDOM(html, opts);
   dom.window.eval(GATES_SRC);
   return dom.window.BallparkGates.evaluatePage(dom.window.document);
 }
@@ -43,7 +45,7 @@ for (const c of soft) {
       path.join(root, 'test/fixtures/pages', c.file),
       'utf8'
     );
-    const result = evaluatePage(html);
+    const result = evaluatePage(html, c.url);
     const expectRun = c.page.expected === 'run';
 
     let outcome = 'ok';
