@@ -6,7 +6,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Ballpark is a Manifest V3 Chrome extension that helps readers calibrate unfamiliar numbers in place. It underlines numbers on a page; clicking one asks Claude (Haiku 4.5, with optional web search) whether the number is large/small/typical for its inferred reference class, then renders a small card next to it. The framing is **calibration, not verification** — the prompt and UI deliberately steer toward directional/relative answers, not fact-checking. See `README.md` for the product rationale.
 
-The extension is published on the Chrome Web Store (first release was manifest `version` 1.0.0; a `version` 1.0.1 resubmission with live-bug fixes is being prepared as of 2026-06-10); end users install it from there with their own Anthropic API key. The workflow below is for developing the source, not for using the shipped extension.
+The extension is published on the Chrome Web Store; end users install it from there with their own Anthropic API key. Release history: `version` 1.0.0 (first release) → 1.0.1 (live-bug fixes) → **1.1.0** (the first calibration-worthiness redesign release: Gates 1 & 2 + status/override panel + the Tier 3 test layer). As of **2026-06-13**, 1.1.0 is built (`ballpark.zip`, the hand-assembled allowlist of 18 files) and **pending Web Store submission**. The workflow below is for developing the source, not for using the shipped extension.
+
+## Redesign status — Workstream B (calibration-worthiness)
+
+Ballpark is mid-redesign to trigger on a number's **calibration-worthiness**, not its mere presence — via three coarse→fine gates plus a decision-accuracy test layer and a status/override panel. Progress as of 2026-06-13 (specs + plans in `specs/`):
+
+- ✅ **Spec 1 — Tier 3 test layer** (decision-accuracy corpus + harness). See `## Testing` below.
+- ✅ **Spec 2 — Gate 1** (surface exclusion): hostname list + editability / control-density / prose-density heuristics; per-site override; popup "This page" panel.
+- ✅ **Spec 3 — Gate 2** (commerce page-type): structured data + real-estate hostname net + article guard.
+- ⏳ **Spec 4 — Gate 3 (NOT BUILT):** per-number triage — the "graspability gap" (`number × scale-word × thing-counted`), cheap-and-local before the API, with a click-time graceful "insufficient context" failure (which also kills the old raw-JSON error). The detector suffix-letter bug (`$3,500 mixed` → `$3,500 m`) folds in here.
+
+`evaluatePage` funnel order in `lib/gates.js`: Gate 1 hostname list → **Gate 2 commerce** → Gate 1 heuristics. Gates default to suppression when unsure; the override toggle is the safety valve. Known tuning item: prose density is `<p>`-only (over-suppresses `<div>`-paragraph articles — first tuning candidate).
 
 ## Developer workflow
 
