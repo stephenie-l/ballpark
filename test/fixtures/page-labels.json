@@ -27,7 +27,8 @@
   },
   {
     "file": "real-estate-listing.html",
-    "tier": "soft",
+    "tier": "hard",
+    "url": "https://www.zillow.com/homedetails/123-maple-st",
     "page": { "expected": "suppress", "gate": "gate2-commerce" }
   },
   {
@@ -55,6 +56,19 @@
     "page": { "expected": "run", "gate": "none" },
     "numbers": [
       { "text": "3.1%", "expected": "underline" }
+    ]
+  },
+  {
+    "file": "product-jsonld.html",
+    "tier": "hard",
+    "page": { "expected": "suppress", "gate": "gate2-commerce" }
+  },
+  {
+    "file": "article-quotes-price.html",
+    "tier": "hard",
+    "page": { "expected": "run", "gate": "none" },
+    "numbers": [
+      { "text": "$3,500 ", "expected": "underline" }
     ]
   }
 ]
