@@ -114,6 +114,21 @@ test('Gate 2 keeps articles and job postings running (precision guards)', () => 
     `<!DOCTYPE html><body>${G2_PROSE}<script type="application/ld+json">{"@type":"JobPosting","title":"Engineer"}</script></body>`
   );
   assert.equal(job.run, true, 'JobPosting runs (keep salaries)');
+
+  // Deliberate tradeoff (suppress-bias): a Product page that ALSO ships an
+  // Article node in its @graph runs — we'd rather under-suppress commerce
+  // (override-recoverable) than risk hiding a real article's numbers.
+  const productPlusArticle = decideHtml(
+    `<!DOCTYPE html><body>${G2_PROSE}<script type="application/ld+json">{"@graph":[{"@type":"Product","name":"x"},{"@type":"Article"}]}</script></body>`
+  );
+  assert.equal(productPlusArticle.run, true, 'Article node in @graph wins over Product');
+});
+
+test('Gate 2 covers non-Product commerce types (hotel)', () => {
+  const hotel = decideHtml(
+    `<!DOCTYPE html><body>${G2_PROSE}<script type="application/ld+json">{"@type":"Hotel","name":"Grand"}</script></body>`
+  );
+  assert.equal(hotel.gate, 'gate2-commerce', 'Hotel JSON-LD suppresses');
 });
 
 const DETECTOR_SRC = fs.readFileSync(path.join(LIB, 'detector.js'), 'utf8');
