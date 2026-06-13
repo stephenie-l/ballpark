@@ -43,6 +43,24 @@ test('hardcoded host list: suffix match and miss', () => {
   assert.equal(listed('example.com').run, true); // not listed → runs (for now)
 });
 
+test('applyOverride: force-on/off win, undefined passes through', () => {
+  const dom = new JSDOM('<!DOCTYPE html><body></body>', { runScripts: 'outside-only' });
+  dom.window.eval(GATES_SRC);
+  const { applyOverride } = dom.window.BallparkGates;
+
+  const verdict = { run: false, gate: 'gate1-interface', reason: 'x' };
+
+  const on = applyOverride(verdict, 'force-on');
+  assert.equal(on.run, true);
+  assert.equal(on.gate, 'override-on');
+
+  const off = applyOverride({ run: true, gate: 'none', reason: '' }, 'force-off');
+  assert.equal(off.run, false);
+  assert.equal(off.gate, 'override-off');
+
+  assert.deepEqual(applyOverride(verdict, undefined), verdict); // unchanged
+});
+
 const DETECTOR_SRC = fs.readFileSync(path.join(LIB, 'detector.js'), 'utf8');
 const PAGES_DIR = path.join(__dirname, 'fixtures', 'pages');
 const LABELS = JSON.parse(
