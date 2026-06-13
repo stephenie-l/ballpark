@@ -30,6 +30,37 @@ test('evaluatePage returns the { run, gate, reason } contract shape', () => {
   assert.equal(typeof result.reason, 'string', 'reason must be a string');
 });
 
+test('hardcoded host list: suffix match and miss', () => {
+  const listed = (host) => {
+    const dom = new JSDOM('<!DOCTYPE html><body><p>hi</p></body>', {
+      runScripts: 'outside-only', url: `https://${host}/`,
+    });
+    dom.window.eval(GATES_SRC);
+    return dom.window.BallparkGates.evaluatePage(dom.window.document);
+  };
+  assert.equal(listed('mail.google.com').gate, 'gate1-communication');
+  assert.equal(listed('secure.chase.com').gate, 'gate1-sensitive'); // subdomain
+  assert.equal(listed('example.com').run, true); // not listed → runs (for now)
+});
+
+test('applyOverride: force-on/off win, undefined passes through', () => {
+  const dom = new JSDOM('<!DOCTYPE html><body></body>', { runScripts: 'outside-only' });
+  dom.window.eval(GATES_SRC);
+  const { applyOverride } = dom.window.BallparkGates;
+
+  const verdict = { run: false, gate: 'gate1-interface', reason: 'x' };
+
+  const on = applyOverride(verdict, 'force-on');
+  assert.equal(on.run, true);
+  assert.equal(on.gate, 'override-on');
+
+  const off = applyOverride({ run: true, gate: 'none', reason: '' }, 'force-off');
+  assert.equal(off.run, false);
+  assert.equal(off.gate, 'override-off');
+
+  assert.deepEqual(applyOverride(verdict, undefined), verdict); // unchanged
+});
+
 const DETECTOR_SRC = fs.readFileSync(path.join(LIB, 'detector.js'), 'utf8');
 const PAGES_DIR = path.join(__dirname, 'fixtures', 'pages');
 const LABELS = JSON.parse(
@@ -38,9 +69,11 @@ const LABELS = JSON.parse(
 
 // Load a corpus fixture into a window with gates + detector evaluated, exactly
 // as the extension loads them.
-function loadFixture(file) {
+function loadFixture(file, { url } = {}) {
   const html = fs.readFileSync(path.join(PAGES_DIR, file), 'utf8');
-  const dom = new JSDOM(html, { runScripts: 'outside-only' });
+  const opts = { runScripts: 'outside-only' };
+  if (url) opts.url = url;
+  const dom = new JSDOM(html, opts);
   dom.window.eval(GATES_SRC);
   dom.window.eval(DETECTOR_SRC);
   return dom.window;
@@ -62,7 +95,7 @@ for (const c of hard) {
   // premature pass is reported) but can't fail the suite.
   const opts = c.pending ? { todo: `awaiting ${c.pending}` } : {};
   test(`page decision: ${c.file}`, opts, () => {
-    const window = loadFixture(c.file);
+    const window = loadFixture(c.file, { url: c.url });
     const result = window.BallparkGates.evaluatePage(window.document);
     assert.equal(
       result.run,

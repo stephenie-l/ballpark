@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Ballpark",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Calibrate unfamiliar numbers while you read. Click any underlined figure for context and comparisons.",
 
   "permissions": ["storage"],
@@ -15,7 +15,7 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["lib/detector.js", "lib/card.js", "content.js"],
+      "js": ["lib/detector.js", "lib/card.js", "lib/gates.js", "content.js"],
       "css": ["content.css"],
       "run_at": "document_idle"
     }

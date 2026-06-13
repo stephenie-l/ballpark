@@ -7,6 +7,19 @@
   const RESCAN_DEBOUNCE_MS = 400;
   let observer = null;
   let rescanTimer = null;
+  let pageStatus = { run: false, gate: 'none', reason: '', count: 0, override: undefined, host: '' };
+
+  function getOverride(host) {
+    return new Promise((resolve) => {
+      chrome.storage.local.get('siteOverrides', ({ siteOverrides }) => {
+        resolve((siteOverrides || {})[host]);
+      });
+    });
+  }
+
+  function countUnderlines() {
+    return document.querySelectorAll('.bp-number').length;
+  }
 
   // Run detection after the DOM is ready
   if (document.readyState === 'loading') {
@@ -15,12 +28,35 @@
     init();
   }
 
-  function init() {
+  async function init() {
+    // Register first (before the await) so the popup always gets a response —
+    // pageStatus already holds a safe default during the storage round-trip.
+    registerStatusListener();
+
+    const verdict = BallparkGates.evaluatePage(document);
+    const override = await getOverride(location.hostname);
+    const decision = BallparkGates.applyOverride(verdict, override);
+    pageStatus = { ...decision, count: 0, override, host: location.hostname };
+
+    if (!decision.run) return; // gated off: no scan, no observer, no listeners
+
     scan();
+    pageStatus.count = countUnderlines();
     observeMutations();
     document.addEventListener('click', handleClick);
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') BallparkCard.hide();
+    });
+  }
+
+  // The popup asks the active tab for its status.
+  function registerStatusListener() {
+    chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+      if (message && message.type === 'GET_STATUS') {
+        sendResponse(pageStatus); // synchronous — channel can close immediately
+        return false;
+      }
+      return false;
     });
   }
 
@@ -50,6 +86,7 @@
     if (observer) observer.disconnect();
     try {
       scan();
+      pageStatus.count = countUnderlines();
     } finally {
       if (observer) observer.observe(document.body, { childList: true, subtree: true });
     }

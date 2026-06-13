@@ -11,13 +11,13 @@
   {
     "file": "bank-dashboard.html",
     "tier": "hard",
-    "pending": "spec2",
+    "url": "https://www.chase.com/personal/checking",
     "page": { "expected": "suppress", "gate": "gate1-sensitive" }
   },
   {
     "file": "webmail-inbox.html",
     "tier": "hard",
-    "pending": "spec2",
+    "url": "https://mail.google.com/mail/u/0/",
     "page": { "expected": "suppress", "gate": "gate1-communication" }
   },
   {
@@ -29,5 +29,32 @@
     "file": "real-estate-listing.html",
     "tier": "soft",
     "page": { "expected": "suppress", "gate": "gate2-commerce" }
+  },
+  {
+    "file": "app-editable.html",
+    "tier": "hard",
+    "url": "https://notes.example.com/doc/123",
+    "page": { "expected": "suppress", "gate": "gate1-editable" }
+  },
+  {
+    "file": "dashboard-controls.html",
+    "tier": "hard",
+    "url": "https://crm.example.com/opportunities",
+    "page": { "expected": "suppress", "gate": "gate1-interface" }
+  },
+  {
+    "file": "api-console.html",
+    "tier": "hard",
+    "url": "https://tools.example.com/console",
+    "page": { "expected": "suppress", "gate": "gate1-interface" }
+  },
+  {
+    "file": "econ-article-tables.html",
+    "tier": "hard",
+    "url": "https://news.example.com/inflation-may",
+    "page": { "expected": "run", "gate": "none" },
+    "numbers": [
+      { "text": "3.1%", "expected": "underline" }
+    ]
   }
 ]

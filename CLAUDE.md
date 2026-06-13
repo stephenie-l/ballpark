@@ -27,10 +27,10 @@ zip -r ballpark.zip \
   manifest.json background.js content.js content.css \
   popup.html popup.css popup.js \
   welcome.html welcome.css \
-  lib/api.js lib/card.js lib/detector.js \
+  lib/api.js lib/card.js lib/detector.js lib/gates.js lib/status.js \
   prompts/calibration.md \
   icons/ballpark_16.png icons/ballpark_48.png icons/ballpark_128.png
-unzip -l ballpark.zip   # verify: exactly these 16 files, no .DS_Store
+unzip -l ballpark.zip   # verify: exactly these 18 files, no .DS_Store
 ```
 
 Every resubmission needs a bumped `manifest.json` `version` or the Web Store rejects it. README screenshots live in tracked `assets/screenshots/` (so they render on GitHub) — these are separate from the store-listing screenshots, which are uploaded directly in the dashboard.
@@ -103,5 +103,6 @@ Both are unsolved — treat them as the core of the design, not an afterthought.
 
 - **Calibration behavior / answer quality:** `prompts/calibration.md` is the primary iteration surface — it's a plain text system prompt fetched at runtime by `background.js`. Changing it needs no code change, just an extension reload. The directional-not-specific constraint lives here and is intentional (see README "Known limitations").
 - **What counts as a number:** `lib/detector.js` — regex patterns plus exclusion heuristics (years, versions, phone numbers, dates, ordinals) and skipped DOM tags (links, code, nav, etc.). This is a precision/recall balance; test against real articles when touching it.
+- **Whether Ballpark runs on a page at all (Gate 1):** `lib/gates.js` — `evaluatePage(document)` returns `{ run, gate, reason }` via a hardcoded hostname list + heuristics (scoped editability, interactive-control density, prose density), with thresholds as tuned constants at the top of the file. The per-site override (`applyOverride`) is layered in `content.js` from `chrome.storage.local`'s `siteOverrides`. The popup's "This page" panel (`lib/status.js` + `popup.js`) reports the decision and exposes the override. Decision accuracy is guarded by Tier 3 (`test/gates.test.js`). Gate 2 (commerce page-type) and Gate 3 (per-number triage) are not yet built — see `specs/`.
 - **Card appearance/positioning:** `lib/card.js` + `content.css`.
 - **API call shape (model, tools, tokens):** `lib/api.js`.
