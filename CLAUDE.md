@@ -70,11 +70,11 @@ drives two harnesses that load the real gate + detector IIFEs into jsdom:
   Borderline cases scored as FP/FN with false positives weighted ~3×; prints a
   report, never throws. No API key needed — decisions are deterministic.
 
-Spec 1 ships the framework with a permissive **stub** `lib/gates.js`; real Gate
-1/2 logic and sanitized real fixtures arrive in Spec 2, Gate 3 in Spec 3. See
-`specs/2026-06-12-decision-accuracy-test-layer.md`. `lib/gates.js` is **not yet
-in `manifest.json` or the packaging allowlist** — it is test-only until Spec 2
-wires it into `content.js`.
+Real Gate 1 & Gate 2 logic now lives in `lib/gates.js` (wired into
+`manifest.json` + the packaging allowlist), so the corpus asserts the real
+decisions: `gate1-*` for surfaces, `gate2-commerce` for commerce pages, `none`
+for run-pages. Gate 3 (per-number triage) is **not built** — see the
+"Redesign status" section above and `specs/`.
 
 ## Two JS execution contexts (the key architectural split)
 
