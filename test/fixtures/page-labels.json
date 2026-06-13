@@ -68,7 +68,7 @@
     "tier": "hard",
     "page": { "expected": "run", "gate": "none" },
     "numbers": [
-      { "text": "$3,500 ", "expected": "underline" }
+      { "text": "$3,500", "expected": "underline" }
     ]
   }
 ]
