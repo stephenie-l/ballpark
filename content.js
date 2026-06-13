@@ -29,12 +29,14 @@
   }
 
   async function init() {
+    // Register first (before the await) so the popup always gets a response —
+    // pageStatus already holds a safe default during the storage round-trip.
+    registerStatusListener();
+
     const verdict = BallparkGates.evaluatePage(document);
     const override = await getOverride(location.hostname);
     const decision = BallparkGates.applyOverride(verdict, override);
     pageStatus = { ...decision, count: 0, override };
-
-    registerStatusListener(); // always — so the panel can report, even when gated off
 
     if (!decision.run) return; // gated off: no scan, no observer, no listeners
 
@@ -51,8 +53,8 @@
   function registerStatusListener() {
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       if (message && message.type === 'GET_STATUS') {
-        sendResponse(pageStatus);
-        return true;
+        sendResponse(pageStatus); // synchronous — channel can close immediately
+        return false;
       }
       return false;
     });
