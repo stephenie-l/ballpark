@@ -61,6 +61,76 @@ test('applyOverride: force-on/off win, undefined passes through', () => {
   assert.deepEqual(applyOverride(verdict, undefined), verdict); // unchanged
 });
 
+// Evaluate a raw HTML string (optionally at a given url) through the gates.
+function decideHtml(html, url) {
+  const opts = { runScripts: 'outside-only' };
+  if (url) opts.url = url;
+  const dom = new JSDOM(html, opts);
+  dom.window.eval(GATES_SRC);
+  return dom.window.BallparkGates.evaluatePage(dom.window.document);
+}
+
+// Prose-rich body so Gate 1 would RUN — isolates Gate 2's effect.
+const G2_PROSE = '<main><article><p>' + 'word '.repeat(60) + '</p></article></main>';
+
+test('Gate 2 suppresses commerce archetypes (structured data + hostname net)', () => {
+  const product = decideHtml(
+    `<!DOCTYPE html><body>${G2_PROSE}<script type="application/ld+json">{"@type":"Product","name":"Sofa"}</script></body>`
+  );
+  assert.equal(product.gate, 'gate2-commerce', 'Product JSON-LD');
+
+  const og = decideHtml(
+    `<!DOCTYPE html><head><meta property="og:type" content="product"></head><body>${G2_PROSE}</body>`
+  );
+  assert.equal(og.gate, 'gate2-commerce', 'og:type=product');
+
+  const micro = decideHtml(
+    `<!DOCTYPE html><body>${G2_PROSE}<div itemscope itemtype="https://schema.org/Product"></div></body>`
+  );
+  assert.equal(micro.gate, 'gate2-commerce', 'Product microdata');
+
+  const graph = decideHtml(
+    `<!DOCTYPE html><body>${G2_PROSE}<script type="application/ld+json">{"@graph":[{"@type":"WebPage"},{"@type":"RealEstateListing"}]}</script></body>`
+  );
+  assert.equal(graph.gate, 'gate2-commerce', '@graph nested type');
+
+  const re = decideHtml(`<!DOCTYPE html><body>${G2_PROSE}</body>`, 'https://www.zillow.com/homes/123');
+  assert.equal(re.gate, 'gate2-commerce', 'real-estate SPA hostname net');
+});
+
+test('Gate 2 keeps articles and job postings running (precision guards)', () => {
+  const article = decideHtml(
+    `<!DOCTYPE html><head><meta property="og:type" content="article"></head><body>${G2_PROSE}<script type="application/ld+json">{"@type":"Product","name":"x"}</script></body>`
+  );
+  assert.equal(article.run, true, 'og:type=article overrides Product');
+  assert.equal(article.gate, 'none');
+
+  const news = decideHtml(
+    `<!DOCTYPE html><body>${G2_PROSE}<script type="application/ld+json">{"@type":"NewsArticle"}</script></body>`
+  );
+  assert.equal(news.run, true, 'NewsArticle runs');
+
+  const job = decideHtml(
+    `<!DOCTYPE html><body>${G2_PROSE}<script type="application/ld+json">{"@type":"JobPosting","title":"Engineer"}</script></body>`
+  );
+  assert.equal(job.run, true, 'JobPosting runs (keep salaries)');
+
+  // Deliberate tradeoff (suppress-bias): a Product page that ALSO ships an
+  // Article node in its @graph runs — we'd rather under-suppress commerce
+  // (override-recoverable) than risk hiding a real article's numbers.
+  const productPlusArticle = decideHtml(
+    `<!DOCTYPE html><body>${G2_PROSE}<script type="application/ld+json">{"@graph":[{"@type":"Product","name":"x"},{"@type":"Article"}]}</script></body>`
+  );
+  assert.equal(productPlusArticle.run, true, 'Article node in @graph wins over Product');
+});
+
+test('Gate 2 covers non-Product commerce types (hotel)', () => {
+  const hotel = decideHtml(
+    `<!DOCTYPE html><body>${G2_PROSE}<script type="application/ld+json">{"@type":"Hotel","name":"Grand"}</script></body>`
+  );
+  assert.equal(hotel.gate, 'gate2-commerce', 'Hotel JSON-LD suppresses');
+});
+
 const DETECTOR_SRC = fs.readFileSync(path.join(LIB, 'detector.js'), 'utf8');
 const PAGES_DIR = path.join(__dirname, 'fixtures', 'pages');
 const LABELS = JSON.parse(
