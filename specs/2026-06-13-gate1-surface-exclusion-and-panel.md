@@ -282,6 +282,15 @@ expected to be tuned against real run results. The panel's override is the safet
 valve that makes aggressive defaults livable; the Tier 3 soft scoreboard is how
 we measure whether a threshold change is net-positive (FP weighted 3×).
 
+**Known v1 limitation — prose measured by `<p>` only.** `proseChars`/`proseBlockCount`
+count only `<p>` elements, so articles that build paragraphs from `<div>` (Medium,
+Substack, some React/CMS news) read as low-prose and get suppressed
+(`gate1-interface`), recoverable via the per-site override. This is the
+conservative default consistent with the suppress-bias; broadening it (e.g.
+counting non-UI-chrome text instead) is the first tuning candidate to validate
+against real run results, and has corpus-wide effects (it flips the `real-estate`
+soft case to "run"). Verify Medium/Substack behavior before deciding.
+
 ## Decomposition (for context)
 
 - **Spec 1 (done)** — Tier 3 test layer + `evaluatePage` stub.
