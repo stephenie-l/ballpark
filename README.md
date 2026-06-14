@@ -66,7 +66,7 @@ No data passes through any server but Anthropic's, and that call is made with *y
 
 ## Install
 
-**From the Chrome Web Store** (recommended): _add listing URL_. After installing, a setup guide opens automatically — paste your Anthropic API key and you're going in under a minute.
+**From the Chrome Web Store** (recommended): [get Ballpark here](https://chromewebstore.google.com/detail/enomdpjeipaeeljjicmmbfpgchcpijjm?utm_source=item-share-cb)
 
 **As an unpacked extension (development):**
 
