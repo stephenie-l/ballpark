@@ -17,6 +17,18 @@ Numbers on the page get a subtle dotted underline. Click one and a small card ap
 
 ![Anatomy of a card: the number clicked, the verdict, the reference class, the comparisons, and the source indicator](assets/screenshots/anatomy.png)
 
+## Where it runs (and where it stays quiet)
+
+An always-on tool that underlined every number on every page would be noise — and if it cried wolf on every price and order total, you'd learn to ignore the underlines entirely. So before Ballpark underlines anything, it decides whether the page is even worth calibrating:
+
+- **It stays off app-like and private surfaces** — your email, your bank and brokerage accounts, dashboards, admin consoles, and other working tools (including ones it's never heard of). Numbers there are personal or transactional, not the kind you read to form a view.
+- **It stays off commerce pages** — product and cart pages, travel booking, real-estate listings, menus — where prices and ratings aren't worth calibrating.
+- **It runs on articles and other reading surfaces**, where calibrating an unfamiliar figure actually helps.
+
+These decisions are made locally in your browser — no API call, no key required, nothing sent anywhere. When it's unsure, it stays quiet (a missed underline is cheaper than an intrusive one).
+
+Click the Ballpark toolbar icon to see what it decided on the current page — *"Ran — found N numbers"* or *"Didn't run — looks like an app"* — and to **override it per-site**: turn Ballpark on for a page it skipped, or off for one it ran on. Your choice sticks for that site.
+
 ## Who it's for
 
 Ballpark is for people who read to understand and form a view, in territory where their numerical intuition isn't calibrated yet:
@@ -38,6 +50,8 @@ When the source indicator reads `~ From memory`, treat the specifics loosely —
 
 ## How it works
 
+**On page load**, Ballpark runs its gates locally (see *Where it runs*) to decide whether the page is worth calibrating — no API call, no key needed — and only underlines numbers if it does. **On click:**
+
 ```
 You click a number
    → content script grabs the number + ~200 chars of surrounding context + page title/URL
@@ -52,7 +66,7 @@ No data passes through any server but Anthropic's, and that call is made with *y
 
 ## Install
 
-**From the Chrome Web Store**: [get Ballpark here](https://chromewebstore.google.com/detail/enomdpjeipaeeljjicmmbfpgchcpijjm?utm_source=item-share-cb)
+**From the Chrome Web Store** (recommended): [get Ballpark here](https://chromewebstore.google.com/detail/enomdpjeipaeeljjicmmbfpgchcpijjm?utm_source=item-share-cb)
 
 **As an unpacked extension (development):**
 
@@ -71,7 +85,7 @@ Why this model:
 - **No middleman** sees your data — there's no Ballpark server to route through
 - **Full transparency** on usage and spend, since it's your own account
 
-The honest tradeoff: each *new* calibration is a real API call, and calls that trigger a web search cost more (search results are re-fed to the model and counted as input tokens). For casual reading this is cents; if you click a lot of new numbers, watch your console usage.
+The honest tradeoff: each *new* calibration is a real API call, and calls that trigger a web search cost more (search results are re-fed to the model and counted as input tokens). In practice we measured **roughly 1¢ per number you look up** (about 80–100 per dollar) — and because most underlined numbers are never clicked, typical reading sessions cost far less. You can track real spend on your Anthropic Platform dashboard.
 
 Repeats are free, though: re-clicking a number you've already checked on the same page is served instantly from a local cache with no API call. The cache lives in `chrome.storage.session`, so it survives the frequent MV3 service-worker restarts but clears when you fully quit the browser or reload the extension — meaning the first click on a given number in a new session pays again.
 
@@ -81,17 +95,18 @@ The model used is Claude Haiku 4.5 — chosen for speed and low cost, with web s
 
 Ballpark collects **nothing**. There is no analytics, no telemetry, and no server operated by this project.
 
-- **Read from the page:** the number you click plus ~200 characters of surrounding text, and the page title and URL — only when you click, never in the background.
-- **Sent to Anthropic:** that same context, using your API key, to generate the calibration. [Anthropic's privacy policy](https://www.anthropic.com/legal/privacy).
-- **Stored:** only your API key, kept locally in `chrome.storage.local` on your own machine. Removing the extension removes it.
+- **Read locally (never leaves your browser):** scanning the page to decide whether to run (the gates) and to underline numbers — all on your machine, no key required.
+- **Sent to Anthropic (only when you click a number):** that number plus ~200 characters of surrounding text, and the page title and URL, using your API key, to generate the calibration. [Anthropic's privacy policy](https://www.anthropic.com/legal/privacy).
+- **Stored:** only your API key and any per-site on/off overrides you set, kept locally in `chrome.storage.local` on your own machine. Removing the extension removes them.
 
 Full details: [Privacy Policy](https://stephenieliew.com/ballpark/privacy)
 
 ## Tech
 
-- Manifest V3, vanilla JS, no build step
-- Content script for number detection and card rendering; background service worker for API calls
-- The calibration prompt lives in `prompts/calibration.md` — that's the file to iterate on
+- Manifest V3, vanilla JS, no build step, no new permissions beyond `storage` + the Anthropic host
+- Content scripts: number detection (`lib/detector.js`), card rendering (`lib/card.js`), and the page-level gates (`lib/gates.js`); the popup status/override panel uses `lib/status.js`. The background service worker (`lib/api.js`) makes the API calls
+- Gating (which pages run, and which numbers get underlined) is **local and deterministic** — only a *click* hits the API
+- The calibration prompt lives in `prompts/calibration.md` — that's the file to iterate on for answer quality
 - Claude Haiku 4.5 with the server-side `web_search_20250305` tool (`max_uses: 1`)
 
 ## Development
@@ -103,7 +118,13 @@ npm install   # installs jsdom, the only dev dependency
 npm test      # runs the test suite via Node's built-in runner
 ```
 
-`test/detector.test.js` covers the number detector (`lib/detector.js`) — black-box tests that load the real content script into a jsdom DOM and assert which numbers get underlined. The detector is a precision/recall balance, so run these after any change there.
+Testing splits into three tiers:
+
+- **`npm test`** runs the deterministic suites (no API key): `test/detector.test.js` — what counts as a number — and `test/gates.test.js` — the page-level run/suppress decision and which numbers get underlined, asserted against a labeled fixture corpus.
+- **`npm run eval`** (needs `ANTHROPIC_API_KEY`) checks *calibration quality* against real cases — it prints a report, never gates.
+- **`npm run eval:decisions`** scores *decision accuracy* (false positives weighted heavier than false negatives) over borderline pages — also a report, no key needed.
+
+The detector and the gates are both precision/recall balances that degrade silently, so run the relevant suite after any change there.
 
 ## Known limitations
 
@@ -113,9 +134,10 @@ npm test      # runs the test suite via Node's built-in runner
 
 ## Roadmap
 
-- **Next version:** a toggle to turn web search on or off — force grounding on every call when you want reliability, or keep it off entirely for speed and the lowest cost
-- A subtle "from cache" indicator on the card (the `cached` flag is already passed through from the background worker; it just needs surfacing)
-- Persisting the cache across sessions (currently session-scoped via `chrome.storage.session`)
+- **Next: per-number triage.** Page-level gating (above) keeps Ballpark off the wrong *surfaces*; the next step is suppressing the numbers you already grasp *within* a valid page — "50,000 reward points" is noise, "50,000 deaths" isn't — plus a graceful *"not enough context to calibrate this"* message for numbers that genuinely can't be anchored.
+- A toggle to turn web search on or off — force grounding on every call for reliability, or skip it for speed and lower cost.
+- A subtle "from cache" indicator on the card (the `cached` flag is already passed through from the background worker; it just needs surfacing).
+- Persisting the cache across sessions (currently session-scoped via `chrome.storage.session`).
 
 ## License
 
