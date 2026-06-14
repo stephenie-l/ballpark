@@ -52,7 +52,7 @@ No data passes through any server but Anthropic's, and that call is made with *y
 
 ## Install
 
-**From the Chrome Web Store** *(once published)*: [link coming soon]
+**From the Chrome Web Store**: [get Ballpark here](https://chromewebstore.google.com/detail/enomdpjeipaeeljjicmmbfpgchcpijjm?utm_source=item-share-cb)
 
 **As an unpacked extension (development):**
 
