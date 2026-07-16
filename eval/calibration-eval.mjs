@@ -1,9 +1,10 @@
 // Tier 2 calibration eval — NOT a unit test.
 //
 // Feeds the real fixtures (test/fixtures/calibration-cases.json) to the real
-// calibrate() from lib/api.js, using the real prompt (prompts/calibration.md)
-// and the real model. This costs API tokens and is non-deterministic, so it
-// lives outside test/ (npm test never runs it) and is invoked manually:
+// calibrate() from lib/providers/anthropic.js, using the real prompt
+// (prompts/calibration.md) and the real model. This costs API tokens and is
+// non-deterministic, so it lives outside test/ (npm test never runs it) and
+// is invoked manually:
 //
 //   ANTHROPIC_API_KEY=sk-ant-... npm run eval
 //
@@ -20,7 +21,7 @@
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
-import { calibrate } from '../lib/api.js';
+import { calibrate } from '../lib/providers/anthropic.js';
 import { evaluateResult } from './scoring.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -39,7 +40,11 @@ async function runCase(c) {
     pageUrl: c.url || '',
   };
   try {
-    const result = await calibrate(process.env.ANTHROPIC_API_KEY, systemPrompt, payload);
+    const result = await calibrate(payload, {
+      activeProvider: 'anthropic',
+      apiKey: process.env.ANTHROPIC_API_KEY,
+      systemPrompt,
+    });
     return { c, result, checks: evaluateResult(c, result) };
   } catch (err) {
     return { c, error: err.message };
@@ -61,12 +66,15 @@ async function runPool(items, worker, concurrency) {
 }
 
 // --- main ---
-const systemPrompt = await readFile(path.join(root, 'prompts/calibration.md'), 'utf8');
-
 if (!process.env.ANTHROPIC_API_KEY) {
   console.error('Set ANTHROPIC_API_KEY in the environment, e.g.\n  ANTHROPIC_API_KEY=sk-ant-... npm run eval');
   process.exit(1);
 }
+
+// Read the prompt once and inject it into each calibrate() config. The provider
+// self-loads via chrome.runtime.getURL in the browser, but that's undefined in
+// Node — the systemPrompt seam lets the eval supply it directly.
+const systemPrompt = await readFile(path.join(root, 'prompts/calibration.md'), 'utf8');
 
 const all = JSON.parse(await readFile(path.join(root, 'test/fixtures/calibration-cases.json'), 'utf8'));
 const cases = all.filter((c) => c.id);
