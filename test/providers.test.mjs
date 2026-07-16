@@ -54,7 +54,8 @@ test('nano calibrate: unavailable hardware → typed unavailable state (no fetch
   const r = await nanoCalibrate({ number: '5', context: '', pageTitle: '', pageUrl: '' }, {});
   assert.equal(r.status, 'unavailable');
   assert.equal(r.provider, 'nano');
-  assert.match(r.message, /add an api key/i);
+  assert.equal(r.action.label, 'Add an API key');
+  assert.equal(r.action.page, 'welcome.html');
   delete globalThis.LanguageModel;
 });
 
@@ -64,6 +65,8 @@ test('nano calibrate: downloadable → typed needs-download state (no fetch)', a
   assert.equal(r.status, 'needs-download');
   assert.equal(r.provider, 'nano');
   assert.match(r.message, /download/i);
+  assert.equal(r.action.label, 'Set up the free model');
+  assert.equal(r.action.page, 'welcome.html');
   delete globalThis.LanguageModel;
 });
 

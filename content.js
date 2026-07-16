@@ -128,6 +128,19 @@
             BallparkCard.error(response.error || 'Unknown error.');
             return;
           }
+          if (response.data && response.data.status) {
+            // Typed device state (needs-download / unavailable) — neutral note,
+            // not a red error, with an actionable link that opens the setup guide.
+            const act = response.data.action;
+            BallparkCard.note(
+              response.data.message,
+              act && {
+                label: act.label,
+                onClick: () => chrome.runtime.sendMessage({ type: 'OPEN_PAGE', page: act.page }),
+              }
+            );
+            return;
+          }
           if (response.data && response.data.insufficient) {
             BallparkCard.note(response.data.message);
             return;
