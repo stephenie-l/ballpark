@@ -71,3 +71,27 @@ test('nano availability: absent LanguageModel global → "unavailable"', async (
   delete globalThis.LanguageModel;
   assert.equal(await nanoAvailability(), 'unavailable');
 });
+
+import { resolveProvider, providers } from '../lib/providers/index.js';
+
+test('resolveProvider: anthropic selected WITH key → anthropic', () => {
+  assert.equal(resolveProvider({ activeProvider: 'anthropic', apiKey: 'sk-x' }).id, 'anthropic');
+});
+
+test('resolveProvider: anthropic selected WITHOUT key → nano (no silent broken path)', () => {
+  assert.equal(resolveProvider({ activeProvider: 'anthropic' }).id, 'nano');
+});
+
+test('resolveProvider: nano selected → nano even if a key is present', () => {
+  assert.equal(resolveProvider({ activeProvider: 'nano', apiKey: 'sk-x' }).id, 'nano');
+});
+
+test('resolveProvider: empty/undefined config → nano (the default tier)', () => {
+  assert.equal(resolveProvider({}).id, 'nano');
+  assert.equal(resolveProvider(undefined).id, 'nano');
+});
+
+test('providers registry exposes nano and anthropic', () => {
+  assert.equal(providers.nano.id, 'nano');
+  assert.equal(providers.anthropic.id, 'anthropic');
+});
