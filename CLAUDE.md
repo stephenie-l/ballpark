@@ -77,9 +77,19 @@ Do not add `import` to a content script or `window.` globals to the background �
 
 ## Request flow (high level)
 
-A click on an underlined number sends a message from the content script to the background worker, which checks a cache, then calls the Anthropic API if needed, then returns the result for the card to render. Network calls only happen in the background; the content script handles UI.
+A click on an underlined number sends a message from the content script to the background worker, which checks a cache, then **resolves the active provider and calibrates** if needed, then returns the result for the card to render. Network/inference calls only happen in the background; the content script handles UI.
 
-There is a session-scoped cache between the click handler and the API call — if a calibration appears to skip the API, look there first.
+There is a session-scoped cache between the click handler and the provider call — if a calibration appears to skip work, look there first. Stable answers (real results + insufficient) are cached; transient device states are not.
+
+## Provider architecture (Ballpark 2.0, piece ② — on branch `provider-abstraction` / PR #9)
+
+Calibration is no longer a single hardcoded Anthropic path. It's a **registry of provider modules** under `lib/providers/`, each implementing `calibrate(payload, config) → Result | Insufficient | TypedStatus` and owning its own prompt:
+
+- **`lib/providers/nano.js`** — free **on-device** tier (Gemini Nano, Chrome built-in Prompt API), runs in the MV3 service worker, no key/cost/extra permission. The zero-setup **default**. Surfaces typed `needs-download` / `unavailable` states (rendered as neutral, actionable notes, not errors). `searched:false` always; `provider:'nano'`.
+- **`lib/providers/anthropic.js`** — the BYOK **upgrade** tier (Claude Haiku 4.5 + web_search). `provider:'anthropic'`, plus a `model` display label. In the browser it self-loads its prompt via `chrome.runtime.getURL`; Node callers (the eval) inject `config.systemPrompt` instead.
+- **`lib/providers/index.js`** — the registry + `resolveProvider(config)`. Rule: `activeProvider==='anthropic' && apiKey` → anthropic, **else nano**. **Mode-selection, honest failure** — exactly one active provider, never a silent swap; the card's provenance line always names what actually answered.
+
+`background.js` is a thin dispatcher (cache → `resolveProvider` → `calibrate` → cache stable answers → route device states; also an `OPEN_PAGE` handler that opens the setup guide). Config lives in `chrome.storage.local`: `activeProvider` (default `'nano'`) + `apiKey`. The **popup's "Calibration engine" toggle** (`popup.js` + `lib/status.js` `engineState`) sets `activeProvider` so a saved key is actually used and users can flip on-device ⇄ key. `lib/api.js` is retired. Adding a provider later = new module + one registry entry (OpenAI/Google/comparison chart are piece ③; onboarding rewrite is piece ④).
 
 ## Planned: local reference layer (NOT YET BUILT — direction)
 
