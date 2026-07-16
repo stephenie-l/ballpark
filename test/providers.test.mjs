@@ -98,3 +98,18 @@ test('providers registry exposes nano and anthropic', () => {
   assert.equal(providers.nano.id, 'nano');
   assert.equal(providers.anthropic.id, 'anthropic');
 });
+
+test('anthropic parseResponse: recovers JSON wrapped in a prose preface', () => {
+  const text =
+    'Based on the search results, here is the calibration:\n\n' +
+    '{"verdict":"Large for a federal agency budget","reference_class":"US federal agency annual budgets",' +
+    '"comparisons":[{"text":"~2x the median cabinet-level agency","source_url":null}]}';
+  const r = parseResponse(text);
+  assert.equal(r.insufficient, undefined);
+  assert.equal(r.verdict, 'Large for a federal agency budget');
+  assert.equal(r.comparisons.length, 1);
+});
+
+test('anthropic parseResponse: pure prose with no JSON object → insufficient', () => {
+  assert.equal(parseResponse('There is no number to calibrate here.').insufficient, true);
+});
