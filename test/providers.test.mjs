@@ -113,3 +113,29 @@ test('anthropic parseResponse: recovers JSON wrapped in a prose preface', () => 
 test('anthropic parseResponse: pure prose with no JSON object → insufficient', () => {
   assert.equal(parseResponse('There is no number to calibrate here.').insufficient, true);
 });
+
+test('nano calibrate: malformed on-device output → graceful insufficient (no throw)', async () => {
+  globalThis.LanguageModel = {
+    availability: async () => 'available',
+    create: async () => ({ prompt: async () => 'not json at all', destroy() {} }),
+  };
+  globalThis.chrome = { runtime: { getURL: (p) => p } };
+  globalThis.fetch = async () => ({ ok: true, text: async () => 'SYSTEM PROMPT' });
+  const r = await nanoCalibrate({ number: '5', context: '', pageTitle: '', pageUrl: '' }, {});
+  assert.equal(r.insufficient, true);
+  assert.equal(r.provider, 'nano');
+  delete globalThis.LanguageModel; delete globalThis.chrome; delete globalThis.fetch;
+});
+
+test('nano calibrate: on-device output missing required fields → graceful insufficient', async () => {
+  globalThis.LanguageModel = {
+    availability: async () => 'available',
+    create: async () => ({ prompt: async () => '{"verdict":"x"}', destroy() {} }),
+  };
+  globalThis.chrome = { runtime: { getURL: (p) => p } };
+  globalThis.fetch = async () => ({ ok: true, text: async () => 'SYSTEM PROMPT' });
+  const r = await nanoCalibrate({ number: '5', context: '', pageTitle: '', pageUrl: '' }, {});
+  assert.equal(r.insufficient, true);
+  assert.equal(r.provider, 'nano');
+  delete globalThis.LanguageModel; delete globalThis.chrome; delete globalThis.fetch;
+});
