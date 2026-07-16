@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Ballpark — Gemini Nano calibration spike</title>
+  <style>
+    body { font: 14px/1.5 -apple-system, system-ui, sans-serif; margin: 24px; color: #1a1a1a; max-width: 1100px; }
+    h1 { font-size: 18px; margin: 0 0 4px; }
+    .sub { color: #666; margin: 0 0 16px; }
+    button { font: inherit; padding: 8px 16px; border: 1px solid #888; border-radius: 6px; background: #f6f6f6; cursor: pointer; }
+    button:disabled { opacity: .5; cursor: default; }
+    #status { margin: 14px 0; padding: 10px 12px; border-radius: 6px; background: #f0f0f0; }
+    #status.good { background: #e6f6ea; } #status.bad { background: #fbe6e6; }
+    #summary { margin: 16px 0; }
+    #summary .big { font-size: 16px; font-weight: 600; margin: 8px 0; }
+    #summary .crit { font-family: ui-monospace, Menlo, monospace; font-size: 12px; color: #444; columns: 2; margin-top: 8px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 12px; font-size: 13px; }
+    th, td { border: 1px solid #ddd; padding: 6px 8px; text-align: left; vertical-align: top; }
+    th { background: #fafafa; }
+    tr.pass td:nth-child(3) { color: #1a7f37; } tr.fail td:nth-child(3) { color: #b3261e; }
+    tr.err td { background: #fbe6e6; }
+    td.verdict { max-width: 340px; } td.refclass { max-width: 240px; color: #555; }
+  </style>
+</head>
+<body>
+  <h1>Gemini Nano — calibration spike (22 fixtures, on-device, no web search)</h1>
+  <p class="sub">Scored with the same <code>eval/scoring.mjs</code> as the Claude Tier-2 eval. Report-only. Go/no-go bar: structural ≥85%, directional ≥70%.</p>
+  <button id="run">Run 22 fixtures</button>
+  <button id="copy" disabled>Copy results JSON</button>
+  <div id="status">Ready. Click “Run 22 fixtures”. First call may take a few seconds to warm up.</div>
+  <div id="summary"></div>
+  <table>
+    <thead><tr><th>id</th><th>expected</th><th>result</th><th>verdict</th><th>reference_class</th></tr></thead>
+    <tbody id="rows"></tbody>
+  </table>
+  <script type="module" src="./harness.mjs"></script>
+</body>
+</html>
