@@ -42,3 +42,32 @@ test('anthropic calibrate: missing apiKey throws a clear error', async () => {
 test('anthropic id is "anthropic"', () => {
   assert.equal(anthropicId, 'anthropic');
 });
+
+import { calibrate as nanoCalibrate, availability as nanoAvailability, id as nanoId } from '../lib/providers/nano.js';
+
+test('nano id is "nano"', () => {
+  assert.equal(nanoId, 'nano');
+});
+
+test('nano calibrate: unavailable hardware → typed unavailable state (no fetch)', async () => {
+  globalThis.LanguageModel = { availability: async () => 'unavailable' };
+  const r = await nanoCalibrate({ number: '5', context: '', pageTitle: '', pageUrl: '' }, {});
+  assert.equal(r.status, 'unavailable');
+  assert.equal(r.provider, 'nano');
+  assert.match(r.message, /add an api key/i);
+  delete globalThis.LanguageModel;
+});
+
+test('nano calibrate: downloadable → typed needs-download state (no fetch)', async () => {
+  globalThis.LanguageModel = { availability: async () => 'downloadable' };
+  const r = await nanoCalibrate({ number: '5', context: '', pageTitle: '', pageUrl: '' }, {});
+  assert.equal(r.status, 'needs-download');
+  assert.equal(r.provider, 'nano');
+  assert.match(r.message, /download/i);
+  delete globalThis.LanguageModel;
+});
+
+test('nano availability: absent LanguageModel global → "unavailable"', async () => {
+  delete globalThis.LanguageModel;
+  assert.equal(await nanoAvailability(), 'unavailable');
+});
