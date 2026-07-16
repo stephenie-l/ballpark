@@ -1,33 +1,19 @@
 // background.js — service worker
-// Handles all Anthropic API calls; content scripts can't call external APIs cleanly in MV3.
+// Dispatches calibration requests to whichever provider is resolved (Nano on-device by
+// default, Anthropic if a key is configured); content scripts can't call external APIs
+// cleanly in MV3, so this is also where any network calls happen.
 
-import { calibrate } from './lib/api.js';
+import { resolveProvider } from './lib/providers/index.js';
 
 // First-run onboarding: Web Store installs are unpinned by default and the
 // popup is easy to miss, so on a fresh install we open a welcome tab that walks
-// the user through adding their Anthropic API key and pinning the toolbar icon.
+// the user through the extension (an Anthropic API key is optional — Nano is
+// the default) and pinning the toolbar icon.
 chrome.runtime.onInstalled.addListener(({ reason }) => {
   if (reason === 'install') {
     chrome.tabs.create({ url: chrome.runtime.getURL('welcome.html') });
   }
 });
-
-let cachedPrompt = null;
-
-async function loadPrompt() {
-  if (cachedPrompt) return cachedPrompt;
-  const url = chrome.runtime.getURL('prompts/calibration.md');
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`Failed to load calibration prompt: ${res.status}`);
-  cachedPrompt = await res.text();
-  return cachedPrompt;
-}
-
-async function getApiKey() {
-  const { apiKey } = await chrome.storage.local.get('apiKey');
-  if (!apiKey) throw new Error('No API key set. Open the Ballpark popup to add your Anthropic API key.');
-  return apiKey;
-}
 
 // Cached responses keyed by number + page URL. Stored in session storage so
 // the cache survives service worker restarts but resets when the browser does.
@@ -49,6 +35,11 @@ async function setCached(payload, data) {
   await chrome.storage.session.set({ [cacheKey(payload)]: data });
 }
 
+async function getConfig() {
+  const { activeProvider = 'nano', apiKey } = await chrome.storage.local.get(['activeProvider', 'apiKey']);
+  return { activeProvider, apiKey };
+}
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type !== 'CALIBRATE') return false;
 
@@ -60,14 +51,29 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         return;
       }
 
-      const [apiKey, prompt] = await Promise.all([getApiKey(), loadPrompt()]);
-      const data = await calibrate(apiKey, prompt, message.payload);
-      await setCached(message.payload, data);
+      const config = await getConfig();
+      const provider = resolveProvider(config);
+      const data = await provider.calibrate(message.payload, config);
+
+      // Cache stable answers (real results + insufficient). Never cache a
+      // transient device state — a re-click after download must re-run.
+      if (!data.status) await setCached(message.payload, data);
       sendResponse({ success: true, data });
     } catch (err) {
       sendResponse({ success: false, error: err.message });
     }
   })();
 
-  return true; // Keep message channel open for async response
+  return true; // keep the channel open for the async response
+});
+
+// A device-state note's action link asks the worker to open an extension page
+// (the setup guide) — content scripts can't open the popup themselves.
+chrome.runtime.onMessage.addListener((message) => {
+  if (message.type !== 'OPEN_PAGE') return false;
+  // page is supplied by our own provider code; getURL confines it to the
+  // extension origin regardless. Default to the guide.
+  const page = typeof message.page === 'string' ? message.page : 'welcome.html';
+  chrome.tabs.create({ url: chrome.runtime.getURL(page) });
+  return false; // fire-and-forget; no async response
 });

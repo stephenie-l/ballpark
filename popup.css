@@ -37,13 +37,15 @@ body {
   font-size: 16px;
   font-weight: 700;
   letter-spacing: -0.3px;
+  line-height: 1.15; /* tight, so the tagline sits snug beneath the title */
   color: #1a1a1a;
 }
 
 .tagline {
   font-size: 12px;
   color: #6e7781;
-  margin-top: 1px;
+  line-height: 1.2;
+  margin-top: 2px;
 }
 
 /* ---- Sections ---- */
@@ -139,6 +141,73 @@ button:active {
 
 .status-error {
   color: #cf222e;
+}
+
+/* ---- Calibration-engine segmented toggle ---- */
+/* Selectors are scoped under .engine-seg-wrap so they out-specify the generic
+   `button { background:#2c5f9e … }` rule above (which would otherwise paint the
+   segments blue, incl. on :hover/:active). */
+
+.engine-seg-wrap {
+  display: flex;
+  border: 1px solid #d0d7de;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.engine-seg-wrap .seg {
+  flex: 1;
+  text-align: center;
+  padding: 8px 6px 7px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+  background: #fff;
+  color: #57606a;
+  border: none;
+  border-right: 1px solid #d0d7de;
+  border-radius: 0;
+  cursor: pointer;
+}
+
+.engine-seg-wrap .seg:last-child {
+  border-right: none;
+}
+
+.engine-seg-wrap .seg small {
+  display: block;
+  font-size: 10.5px;
+  font-weight: 400;
+  color: #8a929b;
+  margin-top: 2px;
+}
+
+.engine-seg-wrap .seg:hover:not(.on):not(:disabled) {
+  background: #f6f8fa;
+}
+
+.engine-seg-wrap .seg.seg--ondevice.on {
+  background: #f5f2fc;
+  color: #8250df; /* matches the card's ⚡ On-device accent */
+}
+.engine-seg-wrap .seg.seg--ondevice.on small { color: #9a86d6; }
+
+.engine-seg-wrap .seg.seg--key.on {
+  background: #eef3fb;
+  color: #2c5f9e;
+}
+.engine-seg-wrap .seg.seg--key.on small { color: #6b8cba; }
+
+.engine-seg-wrap .seg:disabled {
+  color: #b8bec5;
+  background: #fff;
+  cursor: not-allowed;
+}
+.engine-seg-wrap .seg:disabled small { color: #c4cad0; }
+
+.engine-seg-wrap .seg:focus-visible {
+  outline: 2px solid #6b8cba;
+  outline-offset: -2px;
 }
 
 /* ---- Brand accent: mirrors .bp-number in content.css ---- */

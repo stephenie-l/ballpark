@@ -1,9 +1,10 @@
 // Tier 2 calibration eval — NOT a unit test.
 //
 // Feeds the real fixtures (test/fixtures/calibration-cases.json) to the real
-// calibrate() from lib/api.js, using the real prompt (prompts/calibration.md)
-// and the real model. This costs API tokens and is non-deterministic, so it
-// lives outside test/ (npm test never runs it) and is invoked manually:
+// calibrate() from lib/providers/anthropic.js, using the real prompt
+// (prompts/calibration.md) and the real model. This costs API tokens and is
+// non-deterministic, so it lives outside test/ (npm test never runs it) and
+// is invoked manually:
 //
 //   ANTHROPIC_API_KEY=sk-ant-... npm run eval
 //
@@ -20,65 +21,16 @@
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
-import { calibrate } from '../lib/api.js';
+import { calibrate } from '../lib/providers/anthropic.js';
+import { evaluateResult } from './scoring.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(__dirname, '..');
 
 const CONCURRENCY = 4;
 
-// Scale words that signal each direction, used as a fallback when none of the
-// fixture's hand-written verdict_keywords appear verbatim.
-const DIRECTION_WORDS = {
-  large: ['large', 'high', 'big', 'top', 'above', 'more than', 'exceed', 'outsized', 'record', 'steep', 'elevated', 'premium', 'massive', 'huge'],
-  small: ['small', 'low', 'below', 'modest', 'tiny', 'little', 'fraction', 'underwhelm', 'weak', 'mediocre', 'cheap', 'minimal'],
-  average: ['typical', 'average', 'normal', 'in line', 'comparable', 'middling', 'par', 'unremarkable', 'standard', 'median', 'common', 'ordinary'],
-};
-
-const lc = (s) => (s || '').toLowerCase();
-const wordCount = (s) => s.trim().split(/\s+/).filter(Boolean).length;
-
-function evaluateResult(c, result) {
-  const checks = [];
-  const add = (name, ok, detail) => checks.push({ name, ok, detail });
-
-  // The model bowed out via the insufficient_context path.
-  if (result && result.insufficient) {
-    add('usable-result', c.expected_direction === 'uncertain',
-      `insufficient_context → "${result.message}"` +
-      (c.expected_direction === 'uncertain' ? '' : ` (expected a ${c.expected_direction} calibration)`));
-    return checks;
-  }
-
-  // --- Structural ---
-  add('verdict-present', typeof result.verdict === 'string' && result.verdict.trim().length > 0);
-  const vw = result.verdict ? wordCount(result.verdict) : 0;
-  add('verdict-under-15-words', vw > 0 && vw < 15, `${vw} words`);
-  add('reference_class-present', typeof result.reference_class === 'string' && result.reference_class.trim().length > 0);
-  const nComp = Array.isArray(result.comparisons) ? result.comparisons.length : 0;
-  add('comparisons-1-or-2', nComp >= 1 && nComp <= 2, `${nComp} comparisons`);
-  add('searched-is-boolean', typeof result.searched === 'boolean', `searched=${result.searched}`);
-
-  // --- Directional ---
-  const verdict = lc(result.verdict);
-  const expected = c.expected_direction;
-  if (expected === 'uncertain') {
-    // An honest hedge is the win; a confident large/small is the failure.
-    const hedged = (c.verdict_keywords || []).some((k) => verdict.includes(lc(k)));
-    add('direction-hedges', hedged, `expected uncertain | verdict: "${result.verdict}"`);
-  } else {
-    const kwHit = (c.verdict_keywords || []).some((k) => verdict.includes(lc(k)));
-    const wordHit = (DIRECTION_WORDS[expected] || []).some((w) => verdict.includes(w));
-    add('direction-matches', kwHit || wordHit, `expected ${expected} | verdict: "${result.verdict}"`);
-  }
-
-  // --- Reference class on-topic ---
-  const haystack = lc(result.reference_class) + ' ' + (result.comparisons || []).map((x) => lc(x.text)).join(' ');
-  const rcHit = (c.reference_class_keywords || []).some((k) => haystack.includes(lc(k)));
-  add('reference-class-on-topic', rcHit, `reference_class: "${result.reference_class}"`);
-
-  return checks;
-}
+// Scoring (evaluateResult + DIRECTION_WORDS) now lives in ./scoring.mjs so the
+// Nano browser harness scores against the exact same ruler. See eval/nano/.
 
 async function runCase(c) {
   const payload = {
@@ -88,7 +40,11 @@ async function runCase(c) {
     pageUrl: c.url || '',
   };
   try {
-    const result = await calibrate(process.env.ANTHROPIC_API_KEY, systemPrompt, payload);
+    const result = await calibrate(payload, {
+      activeProvider: 'anthropic',
+      apiKey: process.env.ANTHROPIC_API_KEY,
+      systemPrompt,
+    });
     return { c, result, checks: evaluateResult(c, result) };
   } catch (err) {
     return { c, error: err.message };
@@ -110,12 +66,15 @@ async function runPool(items, worker, concurrency) {
 }
 
 // --- main ---
-const systemPrompt = await readFile(path.join(root, 'prompts/calibration.md'), 'utf8');
-
 if (!process.env.ANTHROPIC_API_KEY) {
   console.error('Set ANTHROPIC_API_KEY in the environment, e.g.\n  ANTHROPIC_API_KEY=sk-ant-... npm run eval');
   process.exit(1);
 }
+
+// Read the prompt once and inject it into each calibrate() config. The provider
+// self-loads via chrome.runtime.getURL in the browser, but that's undefined in
+// Node — the systemPrompt seam lets the eval supply it directly.
+const systemPrompt = await readFile(path.join(root, 'prompts/calibration.md'), 'utf8');
 
 const all = JSON.parse(await readFile(path.join(root, 'test/fixtures/calibration-cases.json'), 'utf8'));
 const cases = all.filter((c) => c.id);
