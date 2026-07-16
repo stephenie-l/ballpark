@@ -1,11 +1,14 @@
 // background.js — service worker
-// Handles all Anthropic API calls; content scripts can't call external APIs cleanly in MV3.
+// Dispatches calibration requests to whichever provider is resolved (Nano on-device by
+// default, Anthropic if a key is configured); content scripts can't call external APIs
+// cleanly in MV3, so this is also where any network calls happen.
 
 import { resolveProvider } from './lib/providers/index.js';
 
 // First-run onboarding: Web Store installs are unpinned by default and the
 // popup is easy to miss, so on a fresh install we open a welcome tab that walks
-// the user through adding their Anthropic API key and pinning the toolbar icon.
+// the user through the extension (an Anthropic API key is optional — Nano is
+// the default) and pinning the toolbar icon.
 chrome.runtime.onInstalled.addListener(({ reason }) => {
   if (reason === 'install') {
     chrome.tabs.create({ url: chrome.runtime.getURL('welcome.html') });
