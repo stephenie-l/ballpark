@@ -29,6 +29,7 @@ saveBtn.addEventListener('click', () => {
     keyInput.placeholder = 'sk-…' + value.slice(-4);
     showKeyState(value);
     showStatus('Saved.', 'ok');
+    refreshEngine(); // the key side of the engine toggle can now be selected
   });
 });
 
@@ -49,6 +50,52 @@ function showStatus(msg, type) {
 function showKeyState(apiKey) {
   if (!keyState) return;
   keyState.textContent = '✓ Key saved (…' + apiKey.slice(-4) + ')';
+}
+
+// ---- Calibration-engine toggle (popup only; welcome.html lacks these) ----
+
+const segOndevice = document.getElementById('seg-ondevice');
+const segKey = document.getElementById('seg-key');
+const engineHint = document.getElementById('engine-hint');
+
+const ENGINE_HINTS = {
+  'nano-nokey': 'Free, on-device — no key needed. Add a key below to unlock web-search grounding.',
+  'nano-key': 'On-device — your saved key is kept, just not used right now.',
+  anthropic: 'Using your Anthropic key — Haiku 4.5 with web-search grounding.',
+};
+
+function renderEngine({ apiKey, activeProvider }) {
+  const { active, keyEnabled } = BallparkStatus.engineState({ apiKey, activeProvider });
+  segOndevice.classList.toggle('on', active === 'nano');
+  segKey.classList.toggle('on', active === 'anthropic');
+  segKey.disabled = !keyEnabled;
+  engineHint.textContent =
+    active === 'anthropic'
+      ? ENGINE_HINTS.anthropic
+      : keyEnabled
+        ? ENGINE_HINTS['nano-key']
+        : ENGINE_HINTS['nano-nokey'];
+}
+
+// Guarded: popup.js is shared with welcome.html, which has no engine elements.
+function refreshEngine() {
+  if (!segOndevice) return;
+  chrome.storage.local.get(['apiKey', 'activeProvider'], renderEngine);
+}
+
+function setEngine(provider) {
+  chrome.storage.local.set({ activeProvider: provider }, () => {
+    // Switching engines invalidates cached answers (the cache is keyed by
+    // number+url, not provider), so clear the session cache — a re-click on the
+    // same number then re-runs on the newly-selected engine.
+    chrome.storage.session.clear(refreshEngine);
+  });
+}
+
+if (segOndevice) {
+  segOndevice.addEventListener('click', () => setEngine('nano'));
+  segKey.addEventListener('click', () => { if (!segKey.disabled) setEngine('anthropic'); });
+  refreshEngine();
 }
 
 // ---- This-page status panel ----

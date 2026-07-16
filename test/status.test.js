@@ -57,3 +57,35 @@ test('nextOverrideAction: contextual button + reset', () => {
   // inactive page -> no action
   assert.equal(nextOverrideAction(null), null);
 });
+
+// Note: assert fields individually, not deepEqual — engineState's return object
+// is created in the jsdom window realm, so deepStrictEqual fails a cross-realm
+// prototype check (same reason the formatStatus tests assert field-by-field).
+test('engineState: no key → nano active, key side disabled', () => {
+  const { engineState } = load();
+  for (const r of [engineState({}), engineState()]) {
+    assert.equal(r.active, 'nano');
+    assert.equal(r.keyEnabled, false);
+  }
+});
+
+test('engineState: key + activeProvider anthropic → anthropic active, key enabled', () => {
+  const { engineState } = load();
+  const r = engineState({ apiKey: 'sk-x', activeProvider: 'anthropic' });
+  assert.equal(r.active, 'anthropic');
+  assert.equal(r.keyEnabled, true);
+});
+
+test('engineState: key present but activeProvider nano → nano active, key enabled', () => {
+  const { engineState } = load();
+  const r = engineState({ apiKey: 'sk-x', activeProvider: 'nano' });
+  assert.equal(r.active, 'nano');
+  assert.equal(r.keyEnabled, true);
+});
+
+test('engineState: activeProvider anthropic but no key → nano active (mirrors resolveProvider)', () => {
+  const { engineState } = load();
+  const r = engineState({ activeProvider: 'anthropic' });
+  assert.equal(r.active, 'nano');
+  assert.equal(r.keyEnabled, false);
+});
