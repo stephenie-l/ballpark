@@ -102,9 +102,35 @@ Calibration is no longer a single hardcoded Anthropic path. It's a **registry of
 
 - **`lib/providers/nano.js`** — free **on-device** tier (Gemini Nano, Chrome built-in Prompt API), runs in the MV3 service worker, no key/cost/extra permission. The zero-setup **default**. Surfaces typed `needs-download` / `unavailable` states (rendered as neutral, actionable notes, not errors). `searched:false` always; `provider:'nano'`.
 - **`lib/providers/anthropic.js`** — the BYOK **upgrade** tier (Claude Haiku 4.5 + web_search). `provider:'anthropic'`, plus a `model` display label. In the browser it self-loads its prompt via `chrome.runtime.getURL`; Node callers (the eval) inject `config.systemPrompt` instead.
-- **`lib/providers/index.js`** — the registry + `resolveProvider(config)`. Rule: `activeProvider==='anthropic' && apiKey` → anthropic, **else nano**. **Mode-selection, honest failure** — exactly one active provider, never a silent swap; the card's provenance line always names what actually answered.
+- **`lib/providers/gemini.js`** — the **ungrounded free-cloud fallback** for devices that can't run Nano (piece ④). Current flash model, **no Search grounding** (free tier lacks it → `searched:false` always), `provider:'gemini'` + `model` label. Retries transient `503`; on a persistent `429` daily-cap returns a neutral rate-limited note (honest failure, not a red error). Self-loads its own prompt (`prompts/calibration-gemini.md`); Node callers inject `config.systemPrompt`.
+- **`lib/providers/index.js`** — the registry + `resolveProvider(config)`. **Config-only** three-way rule: `activeProvider==='anthropic' && apiKey` → anthropic; `activeProvider==='gemini' && geminiApiKey` → gemini; **else nano**. `lib/status.js`'s `engineState` mirrors this exactly so the popup can't offer a state the dispatcher won't honor. **Mode-selection, honest failure** — exactly one active provider, never a silent swap; the card's provenance line always names what actually answered.
 
-`background.js` is a thin dispatcher (cache → `resolveProvider` → `calibrate` → cache stable answers → route device states; also an `OPEN_PAGE` handler that opens the setup guide). Config lives in `chrome.storage.local`: `activeProvider` (default `'nano'`) + `apiKey`. The **popup's "Calibration engine" toggle** (`popup.js` + `lib/status.js` `engineState`) sets `activeProvider` so a saved key is actually used and users can flip on-device ⇄ key. `lib/api.js` is retired. Adding a provider later = new module + one registry entry (OpenAI/Google/comparison chart are piece ③; onboarding rewrite is piece ④).
+`background.js` is a thin dispatcher (cache → `resolveProvider` → `calibrate` → cache stable answers → route device states; also an `OPEN_PAGE` handler that opens the setup guide, and a read-only `GET_NANO_STATE` handler the popup uses to read on-device availability — the popup is a classic script and can't import the ESM Nano provider). Config lives in `chrome.storage.local`: `activeProvider` (default `'nano'`) + `apiKey`. The **popup's "Calibration engine" toggle** (`popup.js` + `lib/status.js` `engineState`) sets `activeProvider` so a saved key is actually used and users can flip on-device ⇄ key. `lib/api.js` is retired. Adding a provider later = new module + one registry entry (OpenAI/Google/comparison chart are piece ③; onboarding rewrite is piece ④).
+
+### In progress: piece ④ (onboarding rewrite + Nano download consent) — branch `piece-4-onboarding-download`
+
+`nano.js` exposes `download(onProgress)` but **nothing calls it** — so a device that *could*
+run Nano has no way to turn it on. Piece ④ makes `welcome.html` adaptive (four screens driven
+by `availability()`, with the download running **in the welcome-page tab** because a tab is the
+only context durable enough to outlive a multi-minute download — the popup dies on blur, the
+MV3 worker after ~30s idle). The pure `state → screen` mapping is `screenForState` in
+`lib/status.js`; the popup's "Finish setup" nudge is `nanoNudgeVisible` + `GET_NANO_STATE`.
+
+Scope grew at the UI gate: the approved `unavailable` copy promises free-or-paid keys, which
+pulled in a **third provider, Gemini** (previously v2.5). A real-key re-probe (2026-07-20)
+settled it: free-tier Search grounding is genuinely unavailable, but **ungrounded** Gemini
+works and beats the Nano baseline — so **Gemini ships ungrounded, as the free FALLBACK to
+Nano**, surfaced only when Nano is declined / fails / unavailable (Nano first). Web search
+stays the paid Anthropic upgrade. The popup is a **two-segment contextual picker** (free
+segment = Nano *or* Gemini), and key entry moves entirely to the welcome page.
+
+**Status:** the backend/plumbing (`engineState`, `gemini.js`, `GET_NANO_STATE` +
+`geminiApiKey` wiring) is **built, tested (89/89), and committed** on
+`piece-4-onboarding-download`. Remaining: **Task 4** (real `welcome.html`/`.js`/`.css` from
+the approved v4 mock, incl. the download flow + Gemini-offer surface) and **Task 5** (popup
+two-segment + remove key box). Plan, full probe evidence, and the living diagram:
+`specs/2026-07-16-onboarding-download-consent-plan.md`, `specs/piece4-flow-diagram.md`;
+rationale in `DECISIONS.md` (2026-07-20).
 
 ## Planned: local reference layer (NOT YET BUILT — direction)
 
