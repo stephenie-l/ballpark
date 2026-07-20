@@ -3,7 +3,7 @@
 // default, Anthropic if a key is configured); content scripts can't call external APIs
 // cleanly in MV3, so this is also where any network calls happen.
 
-import { resolveProvider } from './lib/providers/index.js';
+import { resolveProvider, providers } from './lib/providers/index.js';
 
 // First-run onboarding: Web Store installs are unpinned by default and the
 // popup is easy to miss, so on a fresh install we open a welcome tab that walks
@@ -36,8 +36,9 @@ async function setCached(payload, data) {
 }
 
 async function getConfig() {
-  const { activeProvider = 'nano', apiKey } = await chrome.storage.local.get(['activeProvider', 'apiKey']);
-  return { activeProvider, apiKey };
+  const { activeProvider = 'nano', apiKey, geminiApiKey } =
+    await chrome.storage.local.get(['activeProvider', 'apiKey', 'geminiApiKey']);
+  return { activeProvider, apiKey, geminiApiKey };
 }
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -76,4 +77,15 @@ chrome.runtime.onMessage.addListener((message) => {
   const page = typeof message.page === 'string' ? message.page : 'welcome.html';
   chrome.tabs.create({ url: chrome.runtime.getURL(page) });
   return false; // fire-and-forget; no async response
+});
+
+// The popup can't import the ESM Nano provider (it's a classic script), so it
+// asks the worker for the current on-device availability to decide whether to
+// show its "Finish setup" nudge. Read-only; never throws to the caller.
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.type !== 'GET_NANO_STATE') return false;
+  providers.nano.availability()
+    .then((state) => sendResponse({ state }))
+    .catch(() => sendResponse({ state: 'unavailable' }));
+  return true; // async response — keep the channel open
 });
