@@ -41,15 +41,17 @@ rm -f ballpark.zip
 zip -r ballpark.zip \
   manifest.json background.js content.js content.css \
   popup.html popup.css popup.js \
-  welcome.html welcome.css \
-  lib/providers/anthropic.js lib/providers/nano.js lib/providers/index.js \
+  welcome.html welcome.css welcome.js \
+  lib/providers/anthropic.js lib/providers/nano.js lib/providers/gemini.js lib/providers/index.js \
   lib/card.js lib/detector.js lib/gates.js lib/status.js \
-  prompts/calibration.md prompts/calibration-nano.md \
+  prompts/calibration.md prompts/calibration-nano.md prompts/calibration-gemini.md \
   icons/ballpark_16.png icons/ballpark_48.png icons/ballpark_128.png
-unzip -l ballpark.zip   # verify: exactly these 21 files, no .DS_Store
+unzip -l ballpark.zip   # verify: exactly these 24 files, no .DS_Store
 ```
 
 Every resubmission needs a bumped `manifest.json` `version` or the Web Store rejects it. README screenshots live in tracked `assets/screenshots/` (so they render on GitHub) — these are separate from the store-listing screenshots, which are uploaded directly in the dashboard.
+
+`manifest.json` `host_permissions` now includes `https://generativelanguage.googleapis.com/*` (piece ④, the Gemini free-cloud fallback) alongside `api.anthropic.com` — the next store submission must justify both in the listing's permission section.
 
 ## Testing
 
@@ -102,9 +104,39 @@ Calibration is no longer a single hardcoded Anthropic path. It's a **registry of
 
 - **`lib/providers/nano.js`** — free **on-device** tier (Gemini Nano, Chrome built-in Prompt API), runs in the MV3 service worker, no key/cost/extra permission. The zero-setup **default**. Surfaces typed `needs-download` / `unavailable` states (rendered as neutral, actionable notes, not errors). `searched:false` always; `provider:'nano'`.
 - **`lib/providers/anthropic.js`** — the BYOK **upgrade** tier (Claude Haiku 4.5 + web_search). `provider:'anthropic'`, plus a `model` display label. In the browser it self-loads its prompt via `chrome.runtime.getURL`; Node callers (the eval) inject `config.systemPrompt` instead.
-- **`lib/providers/index.js`** — the registry + `resolveProvider(config)`. Rule: `activeProvider==='anthropic' && apiKey` → anthropic, **else nano**. **Mode-selection, honest failure** — exactly one active provider, never a silent swap; the card's provenance line always names what actually answered.
+- **`lib/providers/gemini.js`** — the **ungrounded free-cloud fallback** for devices that can't run Nano (piece ④). Current flash model, **no Search grounding** (free tier lacks it → `searched:false` always), `provider:'gemini'` + `model` label. Retries transient `503`; on a persistent `429` daily-cap returns a neutral rate-limited note (honest failure, not a red error). Self-loads its own prompt (`prompts/calibration-gemini.md`); Node callers inject `config.systemPrompt`.
+- **`lib/providers/index.js`** — the registry + `resolveProvider(config)`. **Config-only** three-way rule: `activeProvider==='anthropic' && apiKey` → anthropic; `activeProvider==='gemini' && geminiApiKey` → gemini; **else nano**. `lib/status.js`'s `engineState` mirrors this exactly so the popup can't offer a state the dispatcher won't honor. **Mode-selection, honest failure** — exactly one active provider, never a silent swap; the card's provenance line always names what actually answered.
 
-`background.js` is a thin dispatcher (cache → `resolveProvider` → `calibrate` → cache stable answers → route device states; also an `OPEN_PAGE` handler that opens the setup guide). Config lives in `chrome.storage.local`: `activeProvider` (default `'nano'`) + `apiKey`. The **popup's "Calibration engine" toggle** (`popup.js` + `lib/status.js` `engineState`) sets `activeProvider` so a saved key is actually used and users can flip on-device ⇄ key. `lib/api.js` is retired. Adding a provider later = new module + one registry entry (OpenAI/Google/comparison chart are piece ③; onboarding rewrite is piece ④).
+`background.js` is a thin dispatcher (cache → `resolveProvider` → `calibrate` → cache stable answers → route device states; also an `OPEN_PAGE` handler that opens the setup guide, and a read-only `GET_NANO_STATE` handler the popup uses to read on-device availability — the popup is a classic script and can't import the ESM Nano provider). Config lives in `chrome.storage.local`: `activeProvider` (default `'nano'`) + `apiKey`. The **popup's "Calibration engine" toggle** (`popup.js` + `lib/status.js` `engineState`) sets `activeProvider` so a saved key is actually used and users can flip on-device ⇄ key. `lib/api.js` is retired. Adding a provider later = new module + one registry entry (OpenAI/Google/comparison chart are piece ③; onboarding rewrite is piece ④).
+
+### Piece ④ (onboarding rewrite + Nano download consent) — ✅ COMPLETE 2026-07-24 on branch `piece-4-onboarding-download`
+
+Piece ④ made `welcome.html` adaptive: six screens driven by `availability()` — the four
+availability states plus two local UI screens (`failed`, `gemini-offer`) — with the one-time
+Nano download running **in the welcome-page tab** because a tab is the only context durable
+enough to outlive a multi-minute download (the popup dies on blur, the MV3 worker after ~30s
+idle). The pure `state → screen` mapping is `screenForState` in `lib/status.js`; the popup's
+contextual nudge is `nanoNudgeVisible` + `GET_NANO_STATE`. Key entry (both providers) lives
+only on the welcome page, and **saving a key also sets `activeProvider`** — the dispatcher is
+config-only, so onboarding must set config or a saved key would silently never be used.
+
+Scope grew at the UI gate: the approved `unavailable` copy promises free-or-paid keys, which
+pulled in a **third provider, Gemini** (previously v2.5). A real-key re-probe (2026-07-20)
+settled it: free-tier Search grounding is genuinely unavailable, but **ungrounded** Gemini
+works and beats the Nano baseline — so **Gemini ships ungrounded, as the free FALLBACK to
+Nano**, surfaced only when Nano is declined / fails / unavailable (Nano first). Web search
+stays the paid Anthropic upgrade. The popup is a **two-segment contextual picker** (free
+segment = Nano *or* Gemini), and key entry moves entirely to the welcome page.
+
+**Status:** all piece ④ tasks are **built, tested (89/89), committed, and pushed** on
+`piece-4-onboarding-download` — backend/plumbing plus the welcome page (`welcome.js` is new),
+the popup two-segment picker (key box removed), and the `generativelanguage.googleapis.com`
+host permission in `manifest.json` (without it the Gemini provider is CORS-blocked; the store
+listing must justify it). **Remaining to ship:** manual end-to-end Chrome test → PR to `main`
+→ bump `version` 1.1.0 → **1.2.0** → hand-zip the 24-file allowlist above → Web Store
+submission. Plan, probe evidence, and the living diagram:
+`specs/2026-07-16-onboarding-download-consent-plan.md`, `specs/piece4-flow-diagram.md`;
+rationale in `DECISIONS.md` (2026-07-20, 2026-07-24).
 
 ## Planned: local reference layer (NOT YET BUILT — direction)
 
@@ -131,4 +163,6 @@ Both are unsolved — treat them as the core of the design, not an afterthought.
 - **What counts as a number:** `lib/detector.js` — regex patterns plus exclusion heuristics (years, versions, phone numbers, dates, ordinals) and skipped DOM tags (links, code, nav, etc.). This is a precision/recall balance; test against real articles when touching it.
 - **Whether Ballpark runs on a page at all (Gate 1):** `lib/gates.js` — `evaluatePage(document)` returns `{ run, gate, reason }` via a hardcoded hostname list + heuristics (scoped editability, interactive-control density, prose density), with thresholds as tuned constants at the top of the file. The per-site override (`applyOverride`) is layered in `content.js` from `chrome.storage.local`'s `siteOverrides`. The popup's "This page" panel (`lib/status.js` + `popup.js`) reports the decision and exposes the override. Decision accuracy is guarded by Tier 3 (`test/gates.test.js`). **Gate 2** (also in `lib/gates.js`, `isCommercePage`) suppresses commerce/transactional page archetypes (retail, real-estate, travel, menus) via structured data (JSON-LD `@type`, microdata, `og:type`) plus a small real-estate-SPA hostname net, with an article guard so price-quoting news still runs; it sits in `evaluatePage` between Gate 1's hostname list and Gate 1's heuristics. Gate 3 (per-number triage) is not yet built — see `specs/`.
 - **Card appearance/positioning:** `lib/card.js` + `content.css`.
-- **API call shape (model, tools, tokens):** `lib/providers/anthropic.js`.
+- **API call shape (model, tools, tokens):** `lib/providers/anthropic.js` (Claude) / `lib/providers/gemini.js` (free cloud fallback).
+- **Onboarding / device-state screens / Nano download consent:** `welcome.html` + `welcome.js` (+ `welcome.css`). The pure state→screen mapping is `screenForState` in `lib/status.js`; `failed` and `gemini-offer` are local UI screens `welcome.js` adds on top of the four availability states. Key entry (both providers) lives ONLY on the welcome page, handled by the shared `popup.js` — saving a key also sets `activeProvider`.
+- **Popup engine picker / "Finish setup" nudge:** `popup.html` + `popup.js` — two segments `[ free | Claude ]`; the free segment renders Nano *or* Gemini contextually via `engineState().freeEngine` (`lib/status.js`). The nudge is `nanoNudgeVisible` + the worker's `GET_NANO_STATE`.

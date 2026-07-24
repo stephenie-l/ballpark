@@ -24,29 +24,11 @@
     <section class="section">
       <label>Calibration engine</label>
       <div class="engine-seg-wrap" role="group" aria-label="Calibration engine">
-        <button type="button" class="seg seg--ondevice" id="seg-ondevice">⚡ On-device<small>Free</small></button>
-        <button type="button" class="seg seg--key" id="seg-key">Haiku 4.5<small>Web search</small></button>
+        <button type="button" class="seg seg--ondevice" id="seg-ondevice">⚡ On-device<small>Free · private</small></button>
+        <button type="button" class="seg seg--key" id="seg-key">Claude<small>Web search</small></button>
       </div>
       <p class="hint engine-hint" id="engine-hint"></p>
-    </section>
-
-    <section class="section">
-      <label for="api-key">Anthropic API key</label>
-      <div class="input-row">
-        <input
-          type="password"
-          id="api-key"
-          placeholder="sk-ant-..."
-          autocomplete="off"
-          spellcheck="false"
-        />
-        <button id="save-btn">Save</button>
-      </div>
-      <p class="hint key-state" id="key-state"></p>
-      <p class="hint" id="save-status"></p>
-      <p class="hint">
-        <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener noreferrer">Get an API key →</a>
-      </p>
+      <a class="engine-nudge" id="engine-nudge" href="welcome.html" target="_blank" rel="noopener noreferrer" hidden>Finish setup →</a>
     </section>
 
     <section class="section section--footer">

@@ -14,70 +14,116 @@
       <p class="tagline">
         Calibrate unfamiliar numbers as you read. Ballpark underlines figures on
         any page — click one to see whether it's <em>large</em>, <em>small</em>,
-        or <em>typical</em> for its context, with comparisons.
+        or <em>typical</em> for its context. <strong>Free, and private to your device.</strong>
       </p>
     </header>
 
-    <ol class="steps">
-      <li class="step">
-        <div class="step-num">1</div>
-        <div class="step-body">
-          <h2>Add your Anthropic API key</h2>
-          <p class="step-text">
-            Ballpark is bring-your-own-key: calibrations run on
-            <strong>your</strong> Anthropic account, so your reading never
-            touches our servers. You only pay Anthropic for what you use — about
-            a cent per number you look up (the low-cost Haiku model), and the
-            numbers you never click cost nothing.
-          </p>
-          <div class="input-row">
-            <input
-              type="password"
-              id="api-key"
-              placeholder="sk-ant-..."
-              autocomplete="off"
-              spellcheck="false"
-            />
-            <button id="save-btn">Save key</button>
-          </div>
-          <p class="hint" id="save-status"></p>
-          <p class="hint">
-            Don't have one?
-            <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener noreferrer">Create an API key →</a>
-            (sign in, then <em>Create Key</em>). The key starts with
-            <code>sk-ant-</code>.
-          </p>
-        </div>
-      </li>
+    <!-- On-device state block — welcome.js shows exactly one of these.
+         'failed' and 'gemini-offer' are local UI screens, not availability() states. -->
+    <section class="state-block">
+      <div class="state-card state-card--ready" id="screen-ready" hidden>
+        <div class="state-badge state-badge--ok">✓</div>
+        <h2>You're all set</h2>
+        <p>Ballpark is working right now — free, and private to your device. <strong>You can close this tab.</strong></p>
+        <p class="state-sub">Open any article and click an <span class="demo-underline">underlined number</span> to calibrate it.</p>
+      </div>
 
-      <li class="step">
-        <div class="step-num">2</div>
-        <div class="step-body">
-          <h2>Pin Ballpark to your toolbar</h2>
-          <p class="step-text">
-            So you can re-open these settings anytime: click the
-            <strong>puzzle-piece icon</strong> (Extensions) at the top-right of
-            Chrome, then click the <strong>pin</strong> next to Ballpark. The
-            Ballpark icon now stays in your toolbar — click it to update your
-            key.
-          </p>
-        </div>
-      </li>
+      <div class="state-card" id="screen-consent" hidden>
+        <div class="rec-top"><span class="pill pill--free">Free</span></div>
+        <h2>Try Ballpark for free</h2>
+        <p>It runs <strong>Gemini Nano</strong>, a small Google AI model, privately on your computer — no account, no payment.</p>
+        <ul class="facts">
+          <li><strong>We check your device first</strong> — many computers already have it.</li>
+          <li>If needed, it downloads once (about <strong>4&nbsp;GB</strong>; needs <strong>22&nbsp;GB free</strong>) — not per use.</li>
+          <li>No web search, and slower than a paid key — best for a quick sense of scale.</li>
+        </ul>
+        <button type="button" class="primary-btn" id="turn-on-btn">Enable Nano</button>
+        <p class="state-sub">Keep this tab open until it's done — usually a minute or two.</p>
+        <p class="hint">Rather not? <a href="#" data-goto="gemini-offer">Try the free cloud version instead →</a></p>
+      </div>
 
-      <li class="step">
-        <div class="step-num">3</div>
-        <div class="step-body">
-          <h2>Start reading</h2>
-          <p class="step-text">
-            Open any article with numbers in it. Numbers Ballpark recognizes get
-            a <span class="demo-underline">dotted underline</span> — click one to
-            calibrate it.
-          </p>
+      <div class="state-card" id="screen-downloading" hidden>
+        <h2>Setting up Ballpark…</h2>
+        <div class="progress" id="progress"><div class="progress-fill" id="progress-fill"></div></div>
+        <p class="progress-pct" id="progress-pct">Setting up…</p>
+        <p class="state-sub">Keep this tab open until the green checkmark appears.</p>
+      </div>
+
+      <!-- Failure is its own AMBER card, not a red line inside the progress card:
+           at the gate the old inline variant read as "still in progress". -->
+      <div class="state-card state-card--failed" id="screen-failed" hidden>
+        <div class="state-badge state-badge--warn">!</div>
+        <h2 id="failed-title">Setup didn't finish</h2>
+        <div class="progress"><div class="progress-fill progress-fill--stalled" id="failed-fill"></div></div>
+        <p class="state-sub" id="failed-reason" hidden></p>
+        <p class="state-sub" id="failed-sub">Your progress is saved — try again to pick up where it left off.</p>
+        <div class="download-retry">
+          <button type="button" class="primary-btn" id="retry-btn">Try again</button>
         </div>
-      </li>
-    </ol>
+        <p class="hint">Keeps failing? <a href="#" data-goto="gemini-offer">Use the free cloud version instead →</a></p>
+      </div>
+
+      <div class="state-card" id="screen-unavailable" hidden>
+        <h2>This device can't run the on-device version</h2>
+        <p>No problem — use Ballpark free in the cloud instead.</p>
+        <p class="hint"><a href="#" data-goto="gemini-offer">Set up the free cloud version →</a></p>
+      </div>
+
+      <div class="state-card" id="screen-gemini-offer" hidden>
+        <div class="rec-top"><span class="pill pill--free">Free</span></div>
+        <h2>Try Ballpark free, in the cloud</h2>
+        <p>Nothing to download — it runs on Google's free Gemini.</p>
+        <ul class="facts">
+          <li>No web search — best for a sense of scale, not exact figures.</li>
+          <li>Free, with a daily limit that resets each day.</li>
+          <li>Needs a free Google key — usually no card.</li>
+        </ul>
+        <div class="input-row">
+          <input type="password" id="gemini-key" placeholder="AIza..." autocomplete="off" spellcheck="false" />
+          <button id="save-gemini-btn">Save key</button>
+        </div>
+        <p class="hint" id="save-gemini-status"></p>
+        <p class="hint">
+          Don't have one?
+          <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">Get a free Gemini key →</a>
+        </p>
+      </div>
+    </section>
+
+    <!-- Paid upgrade — the recommended full experience. Key-save is handled by
+         the shared popup.js. -->
+    <section class="upgrade">
+      <div class="rec-top"><span class="pill pill--rec">Recommended</span></div>
+      <h2>Get Ballpark's full experience</h2>
+      <p class="upgrade-text">
+        For Ballpark's full performance — live web search, faster and
+        source-backed answers — we recommend adding a Claude (Anthropic) key.
+        It's cheap: ~<strong>1¢ per calibration</strong>, roughly
+        <strong>80–100 searches per $1</strong>.
+      </p>
+      <div class="keyopt">
+        <div class="input-row">
+          <input type="password" id="api-key" placeholder="sk-ant-..." autocomplete="off" spellcheck="false" />
+          <button id="save-btn">Save key</button>
+        </div>
+        <p class="hint" id="save-status"></p>
+        <p class="hint">
+          Don't have a key?
+          <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener noreferrer">Create one →</a>
+        </p>
+      </div>
+    </section>
+
+    <!-- Kept from the old page — still useful. -->
+    <section class="pin-tip">
+      <h2>Pin Ballpark to your toolbar</h2>
+      <p>So you can reopen these settings anytime: click the <strong>puzzle-piece icon</strong>
+      (Extensions) at Chrome's top-right, then the <strong>pin</strong> next to Ballpark.</p>
+    </section>
   </main>
 
+  <script src="lib/status.js"></script>
   <script src="popup.js"></script>
+  <script type="module" src="welcome.js"></script>
 </body>
 </html>

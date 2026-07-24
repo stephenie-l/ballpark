@@ -5,7 +5,10 @@
   "description": "Calibrate unfamiliar numbers while you read. Click any underlined figure for context and comparisons.",
 
   "permissions": ["storage"],
-  "host_permissions": ["https://api.anthropic.com/*"],
+  "host_permissions": [
+    "https://api.anthropic.com/*",
+    "https://generativelanguage.googleapis.com/*"
+  ],
 
   "background": {
     "service_worker": "background.js",

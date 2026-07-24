@@ -1,48 +1,91 @@
-// popup.js — shared by popup.html and welcome.html (both expose #api-key,
-// #save-btn, #save-status; #key-state is optional and only present in the popup).
+// popup.js — shared by popup.html and welcome.html. Key entry lives ONLY on
+// the welcome page (#api-key/#save-btn/#save-status and the Gemini elements
+// #gemini-key/#save-gemini-btn/#save-gemini-status); the popup has neither —
+// it is engine-picker + status + nudge. Every block guards on its elements.
 
 const keyInput = document.getElementById('api-key');
 const saveBtn = document.getElementById('save-btn');
 const status = document.getElementById('save-status');
 const keyState = document.getElementById('key-state'); // may be null
 
-// Load existing key (show masked if present)
-chrome.storage.local.get('apiKey', ({ apiKey }) => {
-  if (apiKey) {
-    keyInput.placeholder = 'sk-…' + apiKey.slice(-4);
-    showKeyState(apiKey);
-  }
-});
-
-saveBtn.addEventListener('click', () => {
-  const value = keyInput.value.trim();
-  if (!value) {
-    showStatus('Enter an API key first.', 'error');
-    return;
-  }
-  if (!value.startsWith('sk-')) {
-    showStatus('That doesn\'t look like an Anthropic key.', 'error');
-    return;
-  }
-  chrome.storage.local.set({ apiKey: value }, () => {
-    keyInput.value = '';
-    keyInput.placeholder = 'sk-…' + value.slice(-4);
-    showKeyState(value);
-    showStatus('Saved.', 'ok');
-    refreshEngine(); // the key side of the engine toggle can now be selected
+if (keyInput) {
+  // Load existing key (show masked if present)
+  chrome.storage.local.get('apiKey', ({ apiKey }) => {
+    if (apiKey) {
+      keyInput.placeholder = 'sk-…' + apiKey.slice(-4);
+      showKeyState(apiKey);
+    }
   });
-});
 
-keyInput.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') saveBtn.click();
-});
+  saveBtn.addEventListener('click', () => {
+    const value = keyInput.value.trim();
+    if (!value) {
+      showStatus(status, 'Enter an API key first.', 'error');
+      return;
+    }
+    if (!value.startsWith('sk-')) {
+      showStatus(status, 'That doesn\'t look like an Anthropic key.', 'error');
+      return;
+    }
+    chrome.storage.local.set({ apiKey: value }, () => {
+      keyInput.value = '';
+      keyInput.placeholder = 'sk-…' + value.slice(-4);
+      showKeyState(value);
+      showStatus(status, 'Saved — Ballpark now uses your Claude key.', 'ok');
+      // Saving a key also activates that engine: the dispatcher is config-only,
+      // so a saved-but-unselected key would silently keep answering on the free
+      // engine. The engine toggle remains the way to flip back.
+      setEngine('anthropic');
+    });
+  });
 
-function showStatus(msg, type) {
-  status.textContent = msg;
-  status.className = 'hint status-' + type;
+  keyInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') saveBtn.click();
+  });
+}
+
+// ---- Gemini key (the welcome page's cloud-fallback offer; absent in popup) ----
+
+const geminiKeyInput = document.getElementById('gemini-key');
+const geminiSaveBtn = document.getElementById('save-gemini-btn');
+const geminiStatus = document.getElementById('save-gemini-status');
+
+if (geminiKeyInput) {
+  chrome.storage.local.get('geminiApiKey', ({ geminiApiKey }) => {
+    if (geminiApiKey) geminiKeyInput.placeholder = '…' + geminiApiKey.slice(-4);
+  });
+
+  geminiSaveBtn.addEventListener('click', () => {
+    const value = geminiKeyInput.value.trim();
+    if (!value) {
+      showStatus(geminiStatus, 'Enter a key first.', 'error');
+      return;
+    }
+    // Google issues both classic `AIza…` keys and the newer `AQ.…` auth keys.
+    if (!value.startsWith('AIza') && !value.startsWith('AQ.')) {
+      showStatus(geminiStatus, 'That doesn\'t look like a Gemini key.', 'error');
+      return;
+    }
+    chrome.storage.local.set({ geminiApiKey: value }, () => {
+      geminiKeyInput.value = '';
+      geminiKeyInput.placeholder = '…' + value.slice(-4);
+      showStatus(geminiStatus, 'Saved — Ballpark now uses the free cloud engine.', 'ok');
+      setEngine('gemini');
+    });
+  });
+
+  geminiKeyInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') geminiSaveBtn.click();
+  });
+}
+
+function showStatus(el, msg, type) {
+  if (!el) return;
+  el.textContent = msg;
+  el.className = 'hint status-' + type;
   setTimeout(() => {
-    status.textContent = '';
-    status.className = 'hint';
+    el.textContent = '';
+    el.className = 'hint';
   }, 3000);
 }
 
@@ -52,35 +95,75 @@ function showKeyState(apiKey) {
   keyState.textContent = '✓ Key saved (…' + apiKey.slice(-4) + ')';
 }
 
-// ---- Calibration-engine toggle (popup only; welcome.html lacks these) ----
+// ---- Calibration-engine picker (popup only; welcome.html lacks these) ----
+// Two segments [ free | Claude ]. Nano and Gemini are mutually exclusive free
+// engines (Gemini is the fallback for devices that can't run Nano), so the
+// free segment renders one of them contextually via engineState().freeEngine —
+// never both.
 
 const segOndevice = document.getElementById('seg-ondevice');
 const segKey = document.getElementById('seg-key');
 const engineHint = document.getElementById('engine-hint');
+const engineNudge = document.getElementById('engine-nudge');
 
-const ENGINE_HINTS = {
-  'nano-nokey': 'Free, on-device — no key needed. Add a key below to unlock web-search grounding.',
-  'nano-key': 'On-device — your saved key is kept, just not used right now.',
-  anthropic: 'Using your Anthropic key — Haiku 4.5 with web-search grounding.',
+const FREE_SEG_LABELS = {
+  nano: '⚡ On-device<small>Free · private</small>',
+  gemini: '☁ Gemini<small>Free · cloud</small>',
 };
 
-function renderEngine({ apiKey, activeProvider }) {
-  const { active, keyEnabled } = BallparkStatus.engineState({ apiKey, activeProvider });
-  segOndevice.classList.toggle('on', active === 'nano');
+const ENGINE_HINTS = {
+  nano: 'Free, on-device — no key needed.',
+  gemini: 'Free cloud — no web search, daily limit applies.',
+  anthropic: 'Web-searched, source-backed answers via your Claude key.',
+};
+
+// What a click on the free segment selects; set by the last render.
+let currentFreeEngine = 'nano';
+
+function renderEngine({ apiKey, geminiApiKey, activeProvider }) {
+  const { active, freeEngine, enabled } =
+    BallparkStatus.engineState({ apiKey, geminiApiKey, activeProvider });
+  currentFreeEngine = freeEngine;
+  segOndevice.innerHTML = FREE_SEG_LABELS[freeEngine];
+  segOndevice.classList.toggle('on', active !== 'anthropic');
   segKey.classList.toggle('on', active === 'anthropic');
-  segKey.disabled = !keyEnabled;
+  segKey.disabled = !enabled.anthropic;
   engineHint.textContent =
-    active === 'anthropic'
-      ? ENGINE_HINTS.anthropic
-      : keyEnabled
-        ? ENGINE_HINTS['nano-key']
-        : ENGINE_HINTS['nano-nokey'];
+    active === 'anthropic' ? ENGINE_HINTS.anthropic
+    : active === 'gemini' ? ENGINE_HINTS.gemini
+    : ENGINE_HINTS.nano;
+  refreshNudge({ apiKey, geminiApiKey, activeProvider, enabled, active });
+}
+
+// Contextual link under the hint. Priority: "Finish setup →" when On-device is
+// the active engine but the model isn't ready (availability lives in the ESM
+// Nano provider, so ask the worker); else "Add a Claude key →" when no paid
+// key is saved (key entry lives on the welcome page); hidden when Claude is
+// active.
+function refreshNudge({ apiKey, geminiApiKey, activeProvider, enabled, active }) {
+  if (!engineNudge) return;
+  if (active === 'anthropic') {
+    engineNudge.hidden = true;
+    return;
+  }
+  chrome.runtime.sendMessage({ type: 'GET_NANO_STATE' }, (resp) => {
+    const nanoState = chrome.runtime.lastError ? null : resp && resp.state;
+    if (BallparkStatus.nanoNudgeVisible({ apiKey, geminiApiKey, activeProvider, nanoState })) {
+      engineNudge.textContent = 'Finish setup →';
+      engineNudge.hidden = false;
+    } else if (!enabled.anthropic) {
+      engineNudge.textContent = 'Add a Claude key →';
+      engineNudge.hidden = false;
+    } else {
+      engineNudge.hidden = true;
+    }
+  });
 }
 
 // Guarded: popup.js is shared with welcome.html, which has no engine elements.
 function refreshEngine() {
   if (!segOndevice) return;
-  chrome.storage.local.get(['apiKey', 'activeProvider'], renderEngine);
+  chrome.storage.local.get(['apiKey', 'geminiApiKey', 'activeProvider'], renderEngine);
 }
 
 function setEngine(provider) {
@@ -93,7 +176,7 @@ function setEngine(provider) {
 }
 
 if (segOndevice) {
-  segOndevice.addEventListener('click', () => setEngine('nano'));
+  segOndevice.addEventListener('click', () => setEngine(currentFreeEngine));
   segKey.addEventListener('click', () => { if (!segKey.disabled) setEngine('anthropic'); });
   refreshEngine();
 }

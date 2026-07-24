@@ -139,3 +139,104 @@ test('nano calibrate: on-device output missing required fields → graceful insu
   assert.equal(r.provider, 'nano');
   delete globalThis.LanguageModel; delete globalThis.chrome; delete globalThis.fetch;
 });
+
+// ---- Gemini provider (ungrounded free cloud fallback) ----
+import { parseResponse as geminiParse, calibrate as geminiCalibrate, id as geminiId } from '../lib/providers/gemini.js';
+
+const GEMINI_OK = (text) => ({
+  status: 200, ok: true,
+  json: async () => ({ candidates: [{ content: { parts: [{ text }] } }] }),
+});
+const CARD_JSON = '{"verdict":"High for the class","reference_class":"X","comparisons":[{"text":"~2x typical","source_url":null}]}';
+
+test('gemini id is "gemini"', () => {
+  assert.equal(geminiId, 'gemini');
+});
+
+test('gemini parseResponse: parses clean fenced JSON', () => {
+  const r = geminiParse('```json\n' + CARD_JSON + '\n```');
+  assert.equal(r.verdict, 'High for the class');
+  assert.equal(r.comparisons.length, 1);
+  assert.equal(r.insufficient, undefined);
+});
+
+test('gemini parseResponse: insufficient_context flag → insufficient note', () => {
+  const r = geminiParse('{"insufficient_context":true,"verdict":"Can\'t anchor this."}');
+  assert.equal(r.insufficient, true);
+  assert.equal(r.message, "Can't anchor this.");
+});
+
+test('gemini parseResponse: recovers JSON wrapped in a prose preface', () => {
+  const r = geminiParse('Here is the calibration:\n\n' + CARD_JSON);
+  assert.equal(r.insufficient, undefined);
+  assert.equal(r.verdict, 'High for the class');
+});
+
+test('gemini parseResponse: pure prose with no JSON → insufficient', () => {
+  assert.equal(geminiParse('No number to calibrate here.').insufficient, true);
+});
+
+test('gemini calibrate: missing geminiApiKey throws a clear error', async () => {
+  await assert.rejects(
+    () => geminiCalibrate({ number: '5', context: '', pageTitle: '', pageUrl: '' }, { activeProvider: 'gemini' }),
+    /Gemini API key/
+  );
+});
+
+test('gemini calibrate: happy path → parsed result, searched:false, provider+model set', async () => {
+  globalThis.fetch = async () => GEMINI_OK(CARD_JSON);
+  const r = await geminiCalibrate(
+    { number: '5', context: '', pageTitle: '', pageUrl: '' },
+    { geminiApiKey: 'AIza-x', systemPrompt: 'SYS', retryDelayMs: 0 },
+  );
+  assert.equal(r.provider, 'gemini');
+  assert.equal(r.searched, false);        // free tier never searches — deterministic
+  assert.equal(r.verdict, 'High for the class');
+  assert.equal(typeof r.model, 'string');
+  delete globalThis.fetch;
+});
+
+test('gemini calibrate: persistent 429 (daily cap) → neutral rate-limited note, not a throw', async () => {
+  globalThis.fetch = async () => ({ status: 429, ok: false, json: async () => ({ error: { message: 'quota' } }) });
+  const r = await geminiCalibrate(
+    { number: '5', context: '', pageTitle: '', pageUrl: '' },
+    { geminiApiKey: 'AIza-x', systemPrompt: 'SYS', retryDelayMs: 0 },
+  );
+  assert.equal(r.status, 'rate-limited');
+  assert.equal(r.provider, 'gemini');
+  assert.match(r.message, /limit/i);
+  assert.equal(r.action.page, 'welcome.html');
+  delete globalThis.fetch;
+});
+
+test('gemini calibrate: retries a transient 503 then succeeds', async () => {
+  let calls = 0;
+  globalThis.fetch = async () => {
+    calls++;
+    if (calls === 1) return { status: 503, ok: false, json: async () => ({}) };
+    return GEMINI_OK(CARD_JSON);
+  };
+  const r = await geminiCalibrate(
+    { number: '5', context: '', pageTitle: '', pageUrl: '' },
+    { geminiApiKey: 'AIza-x', systemPrompt: 'SYS', retryDelayMs: 0 },
+  );
+  assert.equal(calls, 2);                 // retried once, then succeeded
+  assert.equal(r.verdict, 'High for the class');
+  delete globalThis.fetch;
+});
+
+test('resolveProvider: gemini selected WITH gemini key → gemini', () => {
+  assert.equal(resolveProvider({ activeProvider: 'gemini', geminiApiKey: 'AIza-x' }).id, 'gemini');
+});
+
+test('resolveProvider: gemini selected WITHOUT gemini key → nano (no silent broken path)', () => {
+  assert.equal(resolveProvider({ activeProvider: 'gemini' }).id, 'nano');
+});
+
+test('resolveProvider: a gemini key present but nano selected → nano (never auto-switches)', () => {
+  assert.equal(resolveProvider({ activeProvider: 'nano', geminiApiKey: 'AIza-x' }).id, 'nano');
+});
+
+test('providers registry exposes gemini', () => {
+  assert.equal(providers.gemini.id, 'gemini');
+});
