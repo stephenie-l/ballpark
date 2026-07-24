@@ -187,3 +187,30 @@ test('nanoNudgeVisible: unknown Nano state → hide (no false alarm)', () => {
   assert.equal(nanoNudgeVisible({ activeProvider: 'nano', nanoState: null }), false);
   assert.equal(nanoNudgeVisible({ activeProvider: 'nano' }), false);
 });
+
+test('failedCopy: never-started download is honest and surfaces Chrome\'s reason', () => {
+  const { failedCopy } = load();
+  const c = failedCopy({
+    message: 'The device does not have enough space for downloading the on-device model',
+    started: false,
+  });
+  assert.match(c.title, /couldn't start/i);
+  assert.match(c.reason, /enough space/);
+  // Nothing downloaded, so never claim progress was saved.
+  assert.doesNotMatch(c.sub, /progress is saved/i);
+});
+
+test('failedCopy: mid-download failure keeps the progress-saved copy', () => {
+  const { failedCopy } = load();
+  const c = failedCopy({ message: 'network changed', started: true });
+  assert.match(c.title, /didn't finish/i);
+  assert.match(c.sub, /progress is saved/i);
+  assert.match(c.reason, /network changed/);
+});
+
+test('failedCopy: no browser message → no dangling reason line', () => {
+  const { failedCopy } = load();
+  const c = failedCopy({ started: false });
+  assert.equal(c.reason, '');
+  assert.ok(c.sub.length > 0, 'still gives the user something to do');
+});

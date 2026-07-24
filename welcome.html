@@ -53,9 +53,10 @@
            at the gate the old inline variant read as "still in progress". -->
       <div class="state-card state-card--failed" id="screen-failed" hidden>
         <div class="state-badge state-badge--warn">!</div>
-        <h2>Setup didn't finish</h2>
+        <h2 id="failed-title">Setup didn't finish</h2>
         <div class="progress"><div class="progress-fill progress-fill--stalled" id="failed-fill"></div></div>
-        <p class="state-sub">Your progress is saved — try again to pick up where it left off.</p>
+        <p class="state-sub" id="failed-reason" hidden></p>
+        <p class="state-sub" id="failed-sub">Your progress is saved — try again to pick up where it left off.</p>
         <div class="download-retry">
           <button type="button" class="primary-btn" id="retry-btn">Try again</button>
         </div>

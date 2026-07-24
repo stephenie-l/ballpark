@@ -36,11 +36,23 @@ function setProgress(fraction) {
 }
 
 // Carry the progress reached into the amber card's bar, so "your progress is
-// saved" is visibly true rather than just a claim.
-function showFailed() {
+// saved" is visibly true rather than just a claim. A download that never
+// started gets "couldn't start" copy + the browser's reason (failedCopy) —
+// an empty bar and Chrome's own words instead of a false "progress saved".
+function showFailed(err, started) {
+  const copy = window.BallparkStatus.failedCopy({ message: err && err.message, started });
   const fill = document.getElementById('progress-fill');
   const failedFill = document.getElementById('failed-fill');
-  if (failedFill && fill) failedFill.style.width = fill.style.width || '35%';
+  if (failedFill) failedFill.style.width = started ? (fill?.style.width || '35%') : '0%';
+  const title = document.getElementById('failed-title');
+  if (title) title.textContent = copy.title;
+  const reason = document.getElementById('failed-reason');
+  if (reason) {
+    reason.textContent = copy.reason;
+    reason.hidden = !copy.reason;
+  }
+  const sub = document.getElementById('failed-sub');
+  if (sub) sub.textContent = copy.sub;
   show('failed');
 }
 
@@ -49,12 +61,16 @@ function showFailed() {
 async function runDownload() {
   show('downloading');
   setProgress(null);
+  let started = false;
   try {
-    await download((fraction) => setProgress(fraction));
+    await download((fraction) => {
+      if (fraction > 0) started = true;
+      setProgress(fraction);
+    });
     show(window.BallparkStatus.screenForState(await availability()));
   } catch (err) {
     console.warn('[Ballpark] Nano download failed:', err);
-    showFailed();
+    showFailed(err, started);
   }
 }
 
