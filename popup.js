@@ -113,8 +113,7 @@ const FREE_SEG_LABELS = {
 
 const ENGINE_HINTS = {
   nano: 'Free, on-device — no key needed.',
-  'nano-key': 'On-device — your saved Claude key is kept, just not used right now.',
-  gemini: 'Free cloud — no web search, daily limit.',
+  gemini: 'Free cloud — no web search, daily limit applies.',
   anthropic: 'Web-searched, source-backed answers via your Claude key.',
 };
 
@@ -132,7 +131,6 @@ function renderEngine({ apiKey, geminiApiKey, activeProvider }) {
   engineHint.textContent =
     active === 'anthropic' ? ENGINE_HINTS.anthropic
     : active === 'gemini' ? ENGINE_HINTS.gemini
-    : enabled.anthropic ? ENGINE_HINTS['nano-key']
     : ENGINE_HINTS.nano;
   refreshNudge({ apiKey, geminiApiKey, activeProvider, enabled, active });
 }
