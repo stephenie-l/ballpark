@@ -56,59 +56,110 @@ body {
   color: #1a1a1a;
 }
 
-/* ---- Steps ---- */
-
-.steps {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+.tagline strong {
+  color: #1a1a1a;
 }
 
-.step {
-  display: flex;
-  gap: 16px;
+/* ---- On-device state cards ---- */
+
+.state-block { margin-bottom: 4px; }
+
+.state-card {
   background: #ffffff;
   border: 1px solid #d0d7de;
   border-radius: 10px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-  padding: 20px 22px;
+  padding: 22px 24px;
 }
 
-.step-num {
-  flex-shrink: 0;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
+.state-card h2 { font-size: 18px; font-weight: 600; margin-bottom: 6px; }
+.state-card p { font-size: 14px; color: #57606a; }
+.state-card .state-sub { font-size: 13px; margin-top: 12px; color: #57606a; }
+.state-card p strong { color: #1a1a1a; }
+
+.state-card--ready {
+  border-color: #b7e0c1;
+  background: #f2fbf5;
+}
+
+/* Amber, not red: setup didn't finish is recoverable, not an error state. The
+   distinct background is what stops it reading as "still in progress". */
+.state-card--failed {
+  border-color: #f0c36d;
+  background: #fdf6e6;
+}
+
+/* The cloud-fallback (Gemini) offer — calm green, distinct from the amber. */
+.state-card--gemini {
+  border-color: #bcd8c6;
+  background: #f4faf6;
+}
+
+.state-badge {
+  width: 30px; height: 30px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 17px; font-weight: 700; color: #fff; margin-bottom: 10px;
+}
+.state-badge--ok { background: #1a7f37; }
+.state-badge--warn { background: #bf8700; }
+.state-badge--cloud { background: #2f7d55; }
+
+/* Consent/offer disclosure lists (check-first / size / limits). */
+.facts { list-style: none; margin: 10px 0 16px; padding: 0; }
+.facts li {
+  position: relative;
+  font-size: 13.5px; color: #57606a;
+  padding-left: 16px; margin-bottom: 5px;
+}
+.facts li::before { content: "•"; position: absolute; left: 3px; color: #8c959f; }
+.facts strong { color: #1a1a1a; }
+
+.primary-btn { margin-top: 4px; }
+
+/* ---- Download progress ---- */
+
+.progress {
+  height: 10px;
+  background: #eaecef;
+  border-radius: 999px;
+  overflow: hidden;
+  margin: 12px 0 6px;
+}
+.progress-fill {
+  height: 100%;
+  width: 0;
   background: #2c5f9e;
-  color: #fff;
-  font-size: 14px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  border-radius: 999px;
+  transition: width 0.3s ease;
 }
+.progress-fill--stalled { background: #d4a72c; transition: none; }
+.progress-pct { font-size: 13px; font-weight: 600; color: #1a1a1a; }
 
-.step-body {
-  flex: 1;
-  min-width: 0;
-}
+.download-retry { margin-top: 12px; }
 
-.step-body h2 {
-  font-size: 16px;
-  font-weight: 600;
-  margin-bottom: 6px;
-}
+/* ---- Upgrade (paid Anthropic key) + pin-tip sections ---- */
 
-.step-text {
-  font-size: 13.5px;
-  color: #57606a;
-  margin-bottom: 12px;
+.upgrade, .pin-tip {
+  background: #ffffff;
+  border: 1px solid #d0d7de;
+  border-radius: 10px;
+  padding: 20px 24px;
+  margin-top: 16px;
 }
+.upgrade h2, .pin-tip h2 { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+.upgrade-text, .pin-tip p { font-size: 13.5px; color: #57606a; margin-bottom: 4px; }
+.pin-tip p { margin-bottom: 0; }
+.pin-tip p strong, .upgrade-text strong { color: #1a1a1a; }
 
-.step-text strong {
-  color: #1a1a1a;
+.rec-top { margin-bottom: 10px; }
+.pill {
+  font-size: 10.5px; font-weight: 700;
+  letter-spacing: .03em; text-transform: uppercase;
+  padding: 2px 7px; border-radius: 999px;
 }
+.pill--rec { background: #dafbe1; color: #1a7f37; }
+
+.keyopt { margin-top: 14px; }
 
 /* ---- Key input (mirrors card/popup styling) ---- */
 
