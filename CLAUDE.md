@@ -109,14 +109,16 @@ Calibration is no longer a single hardcoded Anthropic path. It's a **registry of
 
 `background.js` is a thin dispatcher (cache → `resolveProvider` → `calibrate` → cache stable answers → route device states; also an `OPEN_PAGE` handler that opens the setup guide, and a read-only `GET_NANO_STATE` handler the popup uses to read on-device availability — the popup is a classic script and can't import the ESM Nano provider). Config lives in `chrome.storage.local`: `activeProvider` (default `'nano'`) + `apiKey`. The **popup's "Calibration engine" toggle** (`popup.js` + `lib/status.js` `engineState`) sets `activeProvider` so a saved key is actually used and users can flip on-device ⇄ key. `lib/api.js` is retired. Adding a provider later = new module + one registry entry (OpenAI/Google/comparison chart are piece ③; onboarding rewrite is piece ④).
 
-### In progress: piece ④ (onboarding rewrite + Nano download consent) — branch `piece-4-onboarding-download`
+### Piece ④ (onboarding rewrite + Nano download consent) — ✅ COMPLETE 2026-07-24 on branch `piece-4-onboarding-download`
 
-`nano.js` exposes `download(onProgress)` but **nothing calls it** — so a device that *could*
-run Nano has no way to turn it on. Piece ④ makes `welcome.html` adaptive (four screens driven
-by `availability()`, with the download running **in the welcome-page tab** because a tab is the
-only context durable enough to outlive a multi-minute download — the popup dies on blur, the
-MV3 worker after ~30s idle). The pure `state → screen` mapping is `screenForState` in
-`lib/status.js`; the popup's "Finish setup" nudge is `nanoNudgeVisible` + `GET_NANO_STATE`.
+Piece ④ made `welcome.html` adaptive: six screens driven by `availability()` — the four
+availability states plus two local UI screens (`failed`, `gemini-offer`) — with the one-time
+Nano download running **in the welcome-page tab** because a tab is the only context durable
+enough to outlive a multi-minute download (the popup dies on blur, the MV3 worker after ~30s
+idle). The pure `state → screen` mapping is `screenForState` in `lib/status.js`; the popup's
+contextual nudge is `nanoNudgeVisible` + `GET_NANO_STATE`. Key entry (both providers) lives
+only on the welcome page, and **saving a key also sets `activeProvider`** — the dispatcher is
+config-only, so onboarding must set config or a saved key would silently never be used.
 
 Scope grew at the UI gate: the approved `unavailable` copy promises free-or-paid keys, which
 pulled in a **third provider, Gemini** (previously v2.5). A real-key re-probe (2026-07-20)
@@ -126,13 +128,15 @@ Nano**, surfaced only when Nano is declined / fails / unavailable (Nano first). 
 stays the paid Anthropic upgrade. The popup is a **two-segment contextual picker** (free
 segment = Nano *or* Gemini), and key entry moves entirely to the welcome page.
 
-**Status:** the backend/plumbing (`engineState`, `gemini.js`, `GET_NANO_STATE` +
-`geminiApiKey` wiring) is **built, tested (89/89), and committed** on
-`piece-4-onboarding-download`. Remaining: **Task 4** (real `welcome.html`/`.js`/`.css` from
-the approved v4 mock, incl. the download flow + Gemini-offer surface) and **Task 5** (popup
-two-segment + remove key box). Plan, full probe evidence, and the living diagram:
+**Status:** all piece ④ tasks are **built, tested (89/89), committed, and pushed** on
+`piece-4-onboarding-download` — backend/plumbing plus the welcome page (`welcome.js` is new),
+the popup two-segment picker (key box removed), and the `generativelanguage.googleapis.com`
+host permission in `manifest.json` (without it the Gemini provider is CORS-blocked; the store
+listing must justify it). **Remaining to ship:** manual end-to-end Chrome test → PR to `main`
+→ bump `version` 1.1.0 → **1.2.0** → hand-zip the 24-file allowlist above → Web Store
+submission. Plan, probe evidence, and the living diagram:
 `specs/2026-07-16-onboarding-download-consent-plan.md`, `specs/piece4-flow-diagram.md`;
-rationale in `DECISIONS.md` (2026-07-20).
+rationale in `DECISIONS.md` (2026-07-20, 2026-07-24).
 
 ## Planned: local reference layer (NOT YET BUILT — direction)
 

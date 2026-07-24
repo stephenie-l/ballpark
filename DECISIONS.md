@@ -388,3 +388,39 @@ and committed** on `piece-4-onboarding-download` (3 commits). Tasks **4 (welcome
 remain — the v4 mock (`docs/piece4-mock/welcome-states-remock.html`) is the approved source of truth.
 Live Gemini smoke-test (confirm the pinned `gemini-flash-latest` alias serves a plain free call) is
 the one thing unverified — deferred to the start of Task 4. Exposed probe key still to be revoked.
+
+---
+
+## 2026-07-24 — Piece ④ UI built: welcome page + popup picker; all plan tasks closed
+
+**Saving a key also activates that engine (AI-caught gap, Stephenie approved).** Key-save
+previously only wrote the key; `activeProvider` was set separately by the popup toggle. With key
+entry moved to the welcome page and the dispatcher config-only, a user who saved a Gemini key on
+the offer screen would have stayed on Nano — a dead end that looks like success. Now saving either
+key sets `activeProvider` (+ session-cache clear); the popup toggle remains the way back.
+· *Prevents:* the Gemini offer silently not taking effect; "I added my key, nothing changed."
+
+**Consent screen names Gemini Nano despite the re-mock's trim (AI-flagged, kept).** The v4 re-mock
+compressed the consent body to "runs privately on your computer," dropping the Nano/Google naming
+the 07-19 gate made load-bearing. Built copy reinstates it minimally. Stephenie then edited the
+frame (user-directed): FREE pill, headline "Try Ballpark for free," button "Enable Nano" — the
+button name accepts mild jargon because the body directly above names the model.
+· *Prevents:* softening the transparency disclosure back into vagueness.
+
+**`generativelanguage.googleapis.com` host permission added (plan-flagged risk, confirmed real).**
+The MV3 worker's fetch would otherwise be CORS-blocked — every Gemini calibration would fail.
+Waives the "no new permissions" constraint as the plan allowed; the next store submission must
+justify both host permissions in the listing. · *Prevents:* shipping a free tier that errors on
+first use; a rejected store review for an unexplained permission.
+
+**Verification notes:** `gemini-flash-latest` smoke test passed on a fresh free key (HTTP 200,
+currently serving `gemini-3.6-flash`). Full page + popup verified by rendering the real files over
+localhost (all six welcome screens, popup variants A/B/C vs the mock; real render dispatch and
+gemini-offer routing exercised). Tests 89/89 throughout.
+
+**Process note:** the fresh probe key was again pasted into the session transcript — rotate it.
+
+**Build status at wrap:** piece ④ COMPLETE. Five commits on `piece-4-onboarding-download`
+(welcome page · popup picker · consent copy tweak · manifest host-permission fix · docs/allowlist
+24 files), pushed. Remaining before release: Stephenie's manual end-to-end test in Chrome, PR to
+main, version bump 1.1.0 → 1.2.0, hand-assembled zip, store submission with updated listing.

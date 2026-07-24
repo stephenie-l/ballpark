@@ -398,7 +398,7 @@ git commit -m "feat: add GET_NANO_STATE message handler for the popup nudge"
 
 ---
 
-### Task 4: Reframe `welcome.html` + `welcome.css`; build `welcome.js` (adaptive states + download)
+### Task 4: Reframe `welcome.html` + `welcome.css`; build `welcome.js` (adaptive states + download) — ✅ DONE 2026-07-24 (committed 93949ee + copy tweak b3f51c3)
 
 > **REVISED 2026-07-20 — builds against the Task 1b RE-MOCK, not the original Task 1 mock.**
 > The HTML/copy blocks below predate the Gemini-fallback decision and are now a **starting point,
@@ -754,7 +754,7 @@ git commit -m "feat: reframe onboarding to free on-device default + wire Nano do
 
 ---
 
-### Task 5: Popup — two-segment contextual free control + "Finish setup →" nudge (`popup.html` + `popup.js` + `popup.css`)
+### Task 5: Popup — two-segment contextual free control + "Finish setup →" nudge (`popup.html` + `popup.js` + `popup.css`) — ✅ DONE 2026-07-24 (committed 6f2b86e; popup surface pre-approved in the v4 re-mock, no second gate needed)
 
 Two jobs now. **(a)** The nudge: closes the dead-end where a user selects On-device but nothing visibly happens because the model isn't downloaded. **(b)** The engine control stays **two segments** `[ free | Claude ]`, but the **free segment renders contextually** — "On-device" for a Nano user, "Gemini (free)" for a Gemini user, never both (they're mutually exclusive by the onboarding flow). Also adds the **Gemini key-save handler** that the welcome page's Gemini-offer surface depends on (shared `popup.js` serves both).
 
@@ -851,7 +851,7 @@ git commit -m "feat: popup 'Finish setup' nudge when on-device model isn't ready
 
 ---
 
-### Task 6: Packaging allowlist + docs (`CLAUDE.md`, `AGENTS.md`)
+### Task 6: Packaging allowlist + docs (`CLAUDE.md`, `AGENTS.md`) — ✅ DONE 2026-07-24 (committed cebab01 + 9576183; host permission WAS required and added to `manifest.json`)
 
 `welcome.js` is a new file the extension loads, so it must be in the Web Store zip allowlist, and the docs should point future work at the onboarding surface.
 

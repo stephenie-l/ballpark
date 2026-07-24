@@ -123,3 +123,15 @@ This is what makes "keep this tab open" load-bearing copy rather than decoration
 
 **Superseded:** the old "open question blocking everything" diagram (does free-tier grounding
 work?) — answered NO, and the fork resolved to "keep Gemini, ungrounded, as Nano's fallback."
+
+---
+
+## Status 2026-07-24 — BUILT; this diagram now describes shipped behavior
+
+Piece ④ is complete on `piece-4-onboarding-download` (all six screens, download flow,
+gemini-offer routing, popup two-segment picker, host permission). Two build-time deltas vs
+the flow above: (1) **saving a key also sets `activeProvider`** — onboarding sets config,
+since the dispatcher is config-only; (2) the consent screen's final copy is Stephenie's
+("Try Ballpark for free" / FREE pill / "Enable Nano"), with the Gemini Nano naming kept.
+The host permission question is answered: `generativelanguage.googleapis.com/*` was
+required and is in `manifest.json`. Next: manual test → PR → 1.2.0 submission.
