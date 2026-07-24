@@ -210,6 +210,19 @@ button:active {
   outline-offset: -2px;
 }
 
+/* Contextual link under the engine hint ("Finish setup →" / "Add a Claude
+   key →") — key entry and Nano setup both live on the welcome page. */
+.engine-nudge {
+  display: inline-block;
+  margin-top: 2px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #8250df; /* on-device accent, matches the free segment */
+  text-decoration: none;
+}
+.engine-nudge:hover { text-decoration: underline; }
+.engine-nudge[hidden] { display: none; }
+
 /* ---- Brand accent: mirrors .bp-number in content.css ---- */
 
 .demo-underline {
