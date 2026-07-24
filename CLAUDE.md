@@ -41,15 +41,17 @@ rm -f ballpark.zip
 zip -r ballpark.zip \
   manifest.json background.js content.js content.css \
   popup.html popup.css popup.js \
-  welcome.html welcome.css \
-  lib/providers/anthropic.js lib/providers/nano.js lib/providers/index.js \
+  welcome.html welcome.css welcome.js \
+  lib/providers/anthropic.js lib/providers/nano.js lib/providers/gemini.js lib/providers/index.js \
   lib/card.js lib/detector.js lib/gates.js lib/status.js \
-  prompts/calibration.md prompts/calibration-nano.md \
+  prompts/calibration.md prompts/calibration-nano.md prompts/calibration-gemini.md \
   icons/ballpark_16.png icons/ballpark_48.png icons/ballpark_128.png
-unzip -l ballpark.zip   # verify: exactly these 21 files, no .DS_Store
+unzip -l ballpark.zip   # verify: exactly these 24 files, no .DS_Store
 ```
 
 Every resubmission needs a bumped `manifest.json` `version` or the Web Store rejects it. README screenshots live in tracked `assets/screenshots/` (so they render on GitHub) — these are separate from the store-listing screenshots, which are uploaded directly in the dashboard.
+
+`manifest.json` `host_permissions` now includes `https://generativelanguage.googleapis.com/*` (piece ④, the Gemini free-cloud fallback) alongside `api.anthropic.com` — the next store submission must justify both in the listing's permission section.
 
 ## Testing
 
@@ -157,4 +159,6 @@ Both are unsolved — treat them as the core of the design, not an afterthought.
 - **What counts as a number:** `lib/detector.js` — regex patterns plus exclusion heuristics (years, versions, phone numbers, dates, ordinals) and skipped DOM tags (links, code, nav, etc.). This is a precision/recall balance; test against real articles when touching it.
 - **Whether Ballpark runs on a page at all (Gate 1):** `lib/gates.js` — `evaluatePage(document)` returns `{ run, gate, reason }` via a hardcoded hostname list + heuristics (scoped editability, interactive-control density, prose density), with thresholds as tuned constants at the top of the file. The per-site override (`applyOverride`) is layered in `content.js` from `chrome.storage.local`'s `siteOverrides`. The popup's "This page" panel (`lib/status.js` + `popup.js`) reports the decision and exposes the override. Decision accuracy is guarded by Tier 3 (`test/gates.test.js`). **Gate 2** (also in `lib/gates.js`, `isCommercePage`) suppresses commerce/transactional page archetypes (retail, real-estate, travel, menus) via structured data (JSON-LD `@type`, microdata, `og:type`) plus a small real-estate-SPA hostname net, with an article guard so price-quoting news still runs; it sits in `evaluatePage` between Gate 1's hostname list and Gate 1's heuristics. Gate 3 (per-number triage) is not yet built — see `specs/`.
 - **Card appearance/positioning:** `lib/card.js` + `content.css`.
-- **API call shape (model, tools, tokens):** `lib/providers/anthropic.js`.
+- **API call shape (model, tools, tokens):** `lib/providers/anthropic.js` (Claude) / `lib/providers/gemini.js` (free cloud fallback).
+- **Onboarding / device-state screens / Nano download consent:** `welcome.html` + `welcome.js` (+ `welcome.css`). The pure state→screen mapping is `screenForState` in `lib/status.js`; `failed` and `gemini-offer` are local UI screens `welcome.js` adds on top of the four availability states. Key entry (both providers) lives ONLY on the welcome page, handled by the shared `popup.js` — saving a key also sets `activeProvider`.
+- **Popup engine picker / "Finish setup" nudge:** `popup.html` + `popup.js` — two segments `[ free | Claude ]`; the free segment renders Nano *or* Gemini contextually via `engineState().freeEngine` (`lib/status.js`). The nudge is `nanoNudgeVisible` + the worker's `GET_NANO_STATE`.
